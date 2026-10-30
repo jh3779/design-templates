@@ -1,8 +1,12 @@
 # design-templates
 
-Codex용 디자인 스킬 플러그인입니다. 새 화면을 만들기 전에 **무엇을 만들지**(요구사항)와 **어떻게 보일지**(스타일)를 인터뷰로 정합니다. 스타일이 정해지면 맞는 템플릿의 미리보기를 보여 주고 **"이 템플릿을 적용할까요?"** 라고 묻습니다.
+Codex와 Claude Code에서 쓰는 디자인 스킬 플러그인입니다. 새 화면을 만들기 전에 **무엇을 만들지**(요구사항)와 **어떻게 보일지**(스타일)를 인터뷰로 정합니다. 스타일이 정해지면 맞는 템플릿의 미리보기를 보여 주고 **"이 템플릿을 적용할까요?"** 라고 묻습니다.
 
 ## 설치
+
+아래 명령은 Codex나 Claude Code를 **실행한 채로 그 안에 입력하는 것이 아니라**, 일반 터미널(macOS 터미널, iTerm, VS Code 터미널 등)에 입력합니다. 어느 폴더에서 실행해도 되고, 한 번 설치하면 모든 프로젝트에서 쓸 수 있습니다.
+
+### Codex
 
 ```bash
 codex plugin marketplace add jh3779/design-templates
@@ -11,9 +15,26 @@ codex plugin add design-templates@design-templates
 
 설치한 뒤 Codex를 재시작합니다. `codex plugin list`에서 `design-templates@design-templates`가 `installed, enabled`로 보이면 설치가 끝난 것입니다.
 
+### Claude Code
+
+터미널에서:
+
+```bash
+claude plugin marketplace add jh3779/design-templates
+claude plugin install design-templates@design-templates
+```
+
+또는 Claude Code 대화창 안에서 슬래시 명령으로:
+
+```
+/plugin install design-templates --marketplace jh3779/design-templates
+```
+
+설치한 뒤 Claude Code를 재시작합니다. `claude plugin list`에서 `design-templates@design-templates`가 `enabled`로 보이면 설치가 끝난 것입니다. Claude Code에서는 스킬 이름이 `design-templates:design-interview`처럼 플러그인 이름을 앞에 붙여 표시됩니다.
+
 ## 사용
 
-Codex에게 이렇게 말하면 `design-interview` 스킬이 시작됩니다.
+Codex나 Claude Code에게 이렇게 말하면 `design-interview` 스킬이 시작됩니다.
 
 - "홈페이지 새로 만들자"
 - "어떤 스타일로 갈지 정하자"
@@ -51,6 +72,10 @@ Codex에게 이렇게 말하면 `design-interview` 스킬이 시작됩니다.
 
 ```bash
 codex plugin marketplace upgrade design-templates
+```
+
+```bash
+claude plugin marketplace update design-templates && claude plugin update design-templates@design-templates
 ```
 
 ## 참고
