@@ -1,0 +1,14 @@
+{
+  "name": "design-templates",
+  "version": "0.1.0",
+  "description": "디자인 사전 인터뷰(요구사항·스타일) + 바로 적용 가능한 UI 템플릿 8종",
+  "author": { "name": "jh3779" },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Design Templates",
+    "shortDescription": "Pin down requirements and style, then offer ready-made UI templates",
+    "developerName": "jh3779",
+    "category": "Design",
+    "capabilities": ["Interactive", "Write"]
+  }
+}

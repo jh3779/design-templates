@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Interview"
+  short_description: "Pin down requirements and style direction before any UI"
+  default_prompt: "Use $design-interview to clarify what to build and which design direction to take before generating any UI."

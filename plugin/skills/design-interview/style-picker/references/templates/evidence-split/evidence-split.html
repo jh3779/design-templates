@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evidence Split</title>
+<meta name="description" content="검색·RAG 근거 화면 템플릿 — 왼쪽 결과 목록, 오른쪽 원문 발췌·출처·확인 항목. 판정 색 없이 원문과 출처만 보여 준다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
+<style>
+/* ================================================================
+   토큰 — 출처: LG_CNS_RAG_main/docs/design-system/tokens/tokens.css
+   (frontend/src/tokens.css 와 동일 값). 검색 화면은 밝은 테마 하나(tokens.css:3-6).
+   ================================================================ */
+:root {
+  color-scheme: light;                 /* tokens.css:6 — 단일 밝은 테마(의도적) */
+
+  /* 바탕·글자·선 — tokens.css:9-18 */
+  --bg-1: #f5f6f8;
+  --bg-2: #d9dee5;
+  --ink: #15181d;
+  --ink-2: #5b6370;
+  --ink-3: #636b78;
+  --line: rgba(21, 24, 29, 0.1);
+  --line-strong: rgba(21, 24, 29, 0.18);
+  --glass: rgba(255, 255, 255, 0.72);
+  --surface: #ffffff;
+  --surface-2: #f0f3f7;
+
+  /* 강조: 남색 — tokens.css:21-24 */
+  --accent: #1f3a68;
+  --accent-2: #2c5aa0;
+  --accent-soft: #e9eef6;
+  --on-accent: #ffffff;
+
+  /* 근거 상태 3단계 — 글이 있는가만, 판정 색 없음 — tokens.css:27-30 */
+  --state-text-line: #1f3a68;
+  --state-stated-bg: #eef0f3;
+  --state-stated-line: #d5dae1;
+  --state-none-line: #b7bec9;
+
+  /* 꼬리표 밑줄 (글자 색은 바꾸지 않음) — tokens.css:33 */
+  --flag-line: #3d4f6e;
+
+  /* 글꼴 — tokens.css:39-41 */
+  --font-ui: "Pretendard Variable", Pretendard, "Noto Sans KR", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-source: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-id: "JetBrains Mono", ui-monospace, Consolas, monospace;
+
+  /* 크기 — tokens.css:44-50 */
+  --fs-xs: 12px; --fs-s: 13px; --fs-m: 14px; --fs-l: 16px;
+  --fs-xl: 20px; --fs-2xl: 28px; --fs-source: 15px;
+
+  /* 간격 — tokens.css:53-59 */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+
+  /* 모서리·그림자·초점 — tokens.css:62-66 */
+  --radius: 18px;
+  --radius-s: 10px;
+  --radius-pill: 999px;
+  --shadow-panel: 0 1px 2px rgba(21, 24, 29, 0.06), 0 8px 24px rgba(21, 24, 29, 0.06);
+  --focus: 0 0 0 3px rgba(44, 90, 160, 0.35);
+
+  /* 유리 알약 도구막대 그림자 — frontend/src/styles.css:200 (쇼룸 dock) */
+  --shadow-float: 0 12px 30px rgba(15, 20, 30, 0.12);
+}
+
+/* ---------- 바탕 (search.css:129-140) ---------- */
+* { box-sizing: border-box; }
+html { color: var(--ink); background: var(--bg-1); font-family: var(--font-ui); }
+body {
+  margin: 0; font-size: var(--fs-m); line-height: 1.6; min-height: 100dvh;
+  /* 유리 효과가 보이도록 은은한 바탕 결 — styles.css:114 thumb의 bg-1→bg-2 방사형을 크게 */
+  background:
+    radial-gradient(1200px 520px at 85% -10%, var(--bg-2), transparent 70%),
+    radial-gradient(900px 420px at 0% 0%, var(--accent-soft), transparent 70%),
+    var(--bg-1);
+  background-attachment: fixed;
+}
+button, input { font: inherit; }
+button { cursor: pointer; }
+h1, h2, h3, h4, p { margin: 0; }
+h2, h3 { font-size: var(--fs-m); line-height: 1.4; }
+:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.mono { font-family: var(--font-id); }
+
+/* ---------- 유리 알약 도구막대 (쇼룸 model-tabs·dock: styles.css:71-80, 196-201) ---------- */
+.toolbar-wrap { position: sticky; top: 0; z-index: 20; padding: 14px 20px 0; }
+.toolbar {
+  max-width: 1500px; margin-inline: auto;
+  display: flex; align-items: center; gap: var(--sp-4);
+  padding: 8px 10px 8px 16px;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border: 1px solid var(--line); border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-float);
+}
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; white-space: nowrap; min-width: 0; line-height: 1.35; }
+.brand-mark { flex: none; width: 22px; height: 22px; border-radius: 7px; background: conic-gradient(from 210deg, var(--accent), #6f8fc4, var(--accent)); }
+.brand small { display: block; font-weight: 500; font-size: var(--fs-xs); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; }
+.brand > div { min-width: 0; }
+.tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: var(--radius-pill); flex: none; }
+.tabs button { border: 0; background: transparent; color: var(--ink-2); padding: 6px 14px; min-height: 34px; border-radius: var(--radius-pill); font-size: var(--fs-s); font-weight: 600; white-space: nowrap; }
+.tabs button[aria-selected="true"] { background: var(--accent); color: var(--on-accent); }
+.spacer { flex: 1; }
+.health { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-xs); color: var(--ink-2); white-space: nowrap; padding-right: 6px; }
+.health .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-2); flex: none; }
+
+/* ---------- 검색 입력 (search.css:23-32) ---------- */
+.view { max-width: 1540px; margin-inline: auto; }
+.searchbar { display: grid; grid-template-columns: 1fr auto; gap: var(--sp-2); padding: 22px 28px 8px; }
+.field { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1.5px solid var(--line-strong); border-radius: var(--radius-s); padding: 0 14px; min-width: 0; }
+.field:focus-within { border-color: var(--accent-2); box-shadow: var(--focus); }
+.field input { border: 0; outline: 0; background: transparent; font-family: var(--font-source); font-size: var(--fs-l); padding: 12px 0; width: 100%; min-width: 0; color: var(--ink); }
+.field input::placeholder { color: var(--ink-3); opacity: 1; }
+.field .lang { font-size: 11px; font-weight: 700; color: var(--ink-3); letter-spacing: 0.06em; }
+.btn { border: 0; border-radius: var(--radius-s); padding: 0 20px; font-weight: 600; background: var(--accent); color: var(--on-accent); min-height: 46px; white-space: nowrap; }
+.btn.ghost { background: var(--surface); color: var(--accent); border: 1px solid var(--line-strong); }
+.btn.small { min-height: 34px; padding: 0 14px; font-size: var(--fs-s); }
+.help-line { display: flex; gap: var(--sp-3); flex-wrap: wrap; padding: 0 28px 18px; font-size: var(--fs-xs); color: var(--ink-3); }
+.help-line .count { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* ---------- 두 칸 나눔 (search.css:34-46, 163-171) ---------- */
+.split {
+  display: grid; grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+  height: calc(100dvh - 210px); min-height: 460px;
+  border-top: 1px solid var(--line);
+}
+.list, .detail { min-height: 0; overflow-y: auto; scrollbar-gutter: stable; }
+.list { border-right: 1px solid var(--line); background: var(--glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); padding: 12px; display: grid; gap: 6px; align-content: start; }
+.list-group { display: grid; gap: 6px; }
+.list-group + .list-group { padding-top: 10px; }
+.list-head { display: grid; gap: 2px; padding: 10px 6px 6px; }
+.list-head h2 { font-size: var(--fs-s); }
+.list-head span { font-size: var(--fs-xs); color: var(--ink-3); }
+.item { text-align: left; border: 1px solid transparent; background: var(--surface); border-radius: var(--radius-s); padding: 12px; display: grid; gap: 6px; color: inherit; width: 100%; min-width: 0; }
+.item:hover { border-color: var(--line-strong); }
+.item[aria-current="true"] { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.item-top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.docid { font-family: var(--font-id); font-weight: 600; letter-spacing: 0.01em; }
+.item-top .who { font-size: var(--fs-s); color: var(--ink-2); min-width: 0; overflow-wrap: anywhere; }
+.item-top .date { margin-left: auto; font-size: var(--fs-xs); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.item .snip { font-family: var(--font-source); font-size: var(--fs-s); color: var(--ink); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.item-bottom { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.rank { font-family: var(--font-id); font-size: 11px; color: var(--ink-3); }
+
+/* 알약·칩 (search.css:5-6, 57) */
+.tag { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-xs); font-weight: 600; padding: 3px 10px; border-radius: var(--radius-pill); background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.chip { display: inline-block; font-family: var(--font-id); font-size: 11px; padding: 2px 8px; border-radius: 6px; background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line); word-break: break-word; }
+.mark-n { font-size: 11px; font-weight: 600; color: var(--ink-2); padding: 2px 8px; border-radius: var(--radius-pill); background: var(--surface-2); }
+
+/* 근거 상태 배지 3단계 — 모양(실선·반칠·점선)으로만 구분 (search.css:49-56) */
+.state { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 2px 9px 2px 7px; border-radius: var(--radius-pill); white-space: nowrap; color: var(--ink-2); }
+.state::before { content: ""; width: 9px; height: 9px; border-radius: 50%; flex: none; box-sizing: border-box; }
+.state.text { border: 1.5px solid var(--state-text-line); color: var(--accent); }
+.state.text::before { background: var(--state-text-line); }
+.state.stated { background: var(--state-stated-bg); border: 1.5px solid var(--state-stated-line); }
+.state.stated::before { background: linear-gradient(90deg, var(--ink-2) 50%, transparent 50%); border: 1.5px solid var(--ink-2); }
+.state.none { border: 1.5px dashed var(--state-none-line); }
+.state.none::before { border: 1.5px solid var(--ink-3); }
+
+/* ---------- 상세 (search.css:59-102) ---------- */
+.detail { padding: 22px 26px 28px; display: grid; gap: 18px; align-content: start; min-width: 0; background: var(--bg-1); }
+.d-head { display: grid; gap: 8px; }
+.d-head .row { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; min-width: 0; }
+.d-head .docid { font-size: var(--fs-xl); }
+.d-head .title { font-size: var(--fs-l); font-weight: 700; }
+.d-head .who { color: var(--ink-2); font-size: var(--fs-s); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.block { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-s); padding: 16px 18px; display: grid; gap: 10px; min-width: 0; overflow-wrap: anywhere; }
+.block-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.block-title h3 { font-size: var(--fs-m); font-weight: 700; }
+.byline { font-size: var(--fs-xs); color: var(--ink-2); display: flex; gap: 6px; flex-wrap: wrap; align-items: baseline; }
+.byline b { color: var(--ink); font-weight: 600; }
+.src-field { display: grid; gap: 4px; }
+.src-field .lbl { font-size: 11px; font-weight: 700; color: var(--ink-3); letter-spacing: 0.04em; }
+.source-text { font-family: var(--font-source); font-size: var(--fs-source); line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ink); max-width: 72ch; }
+/* 질의와 맞닿은 구간 — 바탕만 옅은 남색, 글자 색은 그대로 */
+mark.hit { background: var(--accent-soft); color: inherit; padding: 1px 2px; border-radius: 3px; box-shadow: inset 0 -1.5px 0 var(--accent-2); }
+/* 꼬리표 — 글자를 바꾸지 않는 밑줄 (search.css:77-83) */
+span.flag { text-decoration-line: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; text-decoration-color: var(--flag-line); }
+span.flag.vague { text-decoration-style: dotted; }
+span.flag.hedge { text-decoration-style: wavy; }
+.flag-list { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.flagtag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: var(--radius-pill); border: 1px solid var(--line-strong); color: var(--ink-2); background: var(--surface); }
+.flagtag i { width: 18px; height: 6px; display: inline-block; border-bottom: 2px dotted var(--flag-line); }
+.flagtag.hedge i { border-bottom: 0; background: radial-gradient(circle at 3px 6px, transparent 2.2px, var(--flag-line) 2.3px, var(--flag-line) 3px, transparent 3.1px) repeat-x; background-size: 6px 6px; }
+.flaghint { font-size: 11px; color: var(--ink-3); }
+.ev-block.text { border: 1.5px solid var(--state-text-line); }
+.ev-block.stated { background: var(--state-stated-bg); border: 1.5px solid var(--state-stated-line); }
+.ev-block.none { background: transparent; border: 1.5px dashed var(--state-none-line); }
+.status-line { font-size: var(--fs-s); color: var(--ink-2); }
+details.more > summary { cursor: pointer; font-size: var(--fs-xs); color: var(--accent-2); font-weight: 600; list-style: none; width: fit-content; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "＋ "; }
+details.more[open] > summary::before { content: "－ "; }
+/* 키-값 격자 (search.css:88-90) */
+.kv { display: grid; grid-template-columns: 110px 1fr; gap: 4px 12px; font-size: var(--fs-xs); margin: 8px 0 0; }
+.kv dt { color: var(--ink-3); }
+.kv dd { margin: 0; font-family: var(--font-id); overflow-wrap: anywhere; }
+/* 점선 구분 (search.css:91-101) */
+.rel { display: grid; gap: 6px; padding-top: 4px; }
+.rel + .rel { border-top: 1px dashed var(--line); padding-top: 10px; }
+.check { display: grid; gap: 8px; }
+.check-item { display: grid; grid-template-columns: 120px 1fr; gap: 10px; padding-top: 8px; border-top: 1px dashed var(--line); }
+.check-item:first-child { border-top: 0; padding-top: 0; }
+.check-item .lbl { font-weight: 600; font-size: var(--fs-s); }
+.ev { display: grid; gap: 4px; min-width: 0; }
+.ev-row { display: grid; grid-template-columns: 96px 1fr; gap: 8px; font-size: var(--fs-s); }
+.ev-row .f { color: var(--ink-3); font-size: var(--fs-xs); font-family: var(--font-id); }
+.ev-row .t { font-family: var(--font-source); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.ev-more { color: var(--ink-3); font-size: var(--fs-xs); }
+/* 출처 꼬리 (search.css:102, 172) */
+.prov { font-size: 11px; color: var(--ink-3); display: flex; gap: 6px 14px; flex-wrap: wrap; font-family: var(--font-id); line-height: 1.8; padding-top: 12px; border-top: 1px solid var(--line); }
+.prov > span { overflow-wrap: anywhere; min-width: 0; }
+.mobile-back { display: none; justify-self: start; }
+.sample { font-size: 11px; color: var(--ink-3); }
+
+@media (min-width: 768px) and (max-width: 1279px) { .split { grid-template-columns: 300px minmax(0, 1fr); } }
+@media (max-width: 900px) { .health .label-long { display: none; } }
+@media (max-width: 767px) {
+  .toolbar-wrap { padding: 10px 12px 0; }
+  .toolbar { flex-wrap: wrap; gap: 8px 10px; border-radius: var(--radius); padding: 10px 12px; }
+  .brand { width: 100%; }
+  .spacer { display: none; }
+  .health { margin-left: auto; font-size: 11px; }
+  .tabs button { padding: 6px 12px; }
+  .searchbar { grid-template-columns: minmax(0, 1fr); padding: 18px 16px 8px; }
+  .help-line { padding: 0 16px 14px; gap: 4px 12px; }
+  .help-line .count { margin-left: 0; }
+  .split { display: block; height: auto; min-height: 0; }
+  .list, .detail { overflow: visible; scrollbar-gutter: auto; }
+  .list { padding: 12px 16px; border-right: 0; }
+  .detail { padding: 16px; }
+  .split:not(.mobile-detail) > .detail { display: none; }
+  .split.mobile-detail > .list { display: none; }
+  .mobile-back { display: inline-flex; align-items: center; }
+  .block { padding: 16px; }
+  .check-item, .ev-row, .kv { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+@media (prefers-reduced-transparency: reduce) { .toolbar, .list { background: var(--surface); backdrop-filter: none; -webkit-backdrop-filter: none; } }
+</style>
+</head>
+<body>
+<div class="toolbar-wrap">
+  <header class="toolbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <div>문서 근거 찾기<small>사내 규정 · 제품 매뉴얼 원문</small></div>
+    </div>
+    <div class="tabs" role="tablist" aria-label="화면">
+      <button type="button" role="tab" aria-selected="true">근거 검색</button>
+      <button type="button" role="tab" aria-selected="false">문서 목록</button>
+    </div>
+    <span class="spacer"></span>
+    <span class="health" title="색인 판본"><span class="dot" aria-hidden="true"></span><span>문서 1,284건<span class="label-long"> · 색인 2026-10-28</span></span></span>
+  </header>
+</div>
+
+<main class="view">
+  <form class="searchbar" role="search" onsubmit="event.preventDefault()">
+    <label class="field">
+      <span class="sr-only">찾을 내용</span>
+      <span class="lang" aria-hidden="true">EN</span>
+      <input type="search" value="battery charging must stop when cell temperature exceeds limit" placeholder="찾을 상황을 영어로 — 예: replace filter after error code E4">
+    </label>
+    <button class="btn" type="submit">근거 찾기</button>
+  </form>
+  <p class="help-line"><span>영어 질문만 받습니다</span><span>사내 규정 최대 5건 + 제품 매뉴얼 상위 10건</span><span class="sample">예시 데이터</span><span class="count">61 / 4000자</span></p>
+
+  <div class="split" id="split">
+    <nav class="list" id="list" aria-label="검색 결과"></nav>
+    <section class="detail" id="detail" aria-live="polite"></section>
+  </div>
+</main>
+
+<script>
+/* 예시 데이터 — 실제 문서가 아닙니다. 원문 조각(parts)을 이어 붙이면 항상 원문과 같습니다. */
+const DOCS = [
+  { id: "REG-SAF-0412", sec: "§3.2", group: "reg", kind: "사내 규정", title: "충전 설비 안전 운영 기준",
+    owner: "품질안전팀", date: "2025.03.14", rank: 1, state: "text", chips: ["charging", "battery-pack", "thermal"],
+    parts: [
+      { t: "During charging, the controller " },
+      { t: "shall stop the charging current when any cell temperature exceeds 55 °C", hit: true },
+      { t: " for more than 3 seconds. Charging may resume only after the pack has cooled below 45 °C and the operator has acknowledged the event. " },
+      { t: "Where practicable", flag: "hedge" },
+      { t: ", the event should be logged with the cell index and the peak value." }
+    ],
+    rule: [
+      { t: "Threshold values are defined in Annex B, Table 2. Sites operating at ambient temperatures above 35 °C apply " },
+      { t: "an appropriate margin", flag: "vague" },
+      { t: " as agreed with the safety officer." }
+    ],
+    speaker: "품질안전팀 (규정 원본 작성 부서)", ver: "개정 7판",
+    src: { file: "REG-SAF-0412_rev7.pdf", page: "p.12–13", sha: "9f2c41ab0e7d55c3a1b8e604f2d9c7e1b3a0f58d2c6e4b17a9d0c3f5e8b21a64", issued: "2025-03-14", basis: "pdf_text (OCR 없음)" },
+    related: [
+      { id: "REG-SAF-0412 §3.4", who: "품질안전팀", text: "Operators shall record every forced stop in the site log within the same shift." },
+      { id: "MAN-CHG-210 §6.1", who: "제품기술팀", text: "The charger displays code T-55 when it interrupts charging because of cell temperature." }
+    ],
+    check: [
+      { lbl: "적용 범위", ev: [["§3.2", "During charging, the controller shall stop the charging current…"], ["§1.1", "This standard applies to all fixed charging stations on company premises."]] },
+      { lbl: "임계값", ev: [["§3.2", "…when any cell temperature exceeds 55 °C for more than 3 seconds."], ["Annex B", "Table 2 — Cell temperature limits by pack type."]] },
+      { lbl: "재개 조건", ev: [["§3.2", "Charging may resume only after the pack has cooled below 45 °C…"]], more: "근거 1건 더" }
+    ] },
+  { id: "REG-OPS-0188", sec: "§5", group: "reg", kind: "사내 규정", title: "설비 이상 시 보고 절차",
+    owner: "운영관리팀", date: "2024.11.02", rank: 4, state: "stated", chips: ["incident", "reporting"],
+    parts: [
+      { t: "Any abnormal stop of charging equipment " },
+      { t: "shall be reported", hit: true },
+      { t: " to the facility manager. The detailed criteria for stopping are " },
+      { t: "set out in a separate instruction", flag: "vague" },
+      { t: "." }
+    ],
+    rule: null, ruleNote: "문서가 '별도 지침에 따른다'고만 적었습니다. 지침 원문은 이 문서에 없습니다.",
+    speaker: "운영관리팀 (규정 원본 작성 부서)", ver: "개정 3판",
+    src: { file: "REG-OPS-0188_rev3.docx", page: "p.4", sha: "41e0b7c2d9a35f86e1c04b2a7d9f3e5c8b6a1d0e2f4c7b9a3e5d1c6f8a2b4e70", issued: "2024-11-02", basis: "docx_text" },
+    related: [], check: [{ lbl: "보고 대상", ev: [["§5", "…shall be reported to the facility manager."]] }] },
+  { id: "REG-SAF-0390", sec: "§2.7", group: "reg", kind: "사내 규정", title: "배터리 보관 구역 관리",
+    owner: "품질안전팀", date: "2023.06.21", rank: 9, state: "none", chips: ["storage"],
+    parts: [{ t: "Packs in storage shall be kept between 15 °C and 25 °C and " }, { t: "inspected weekly", hit: true }, { t: " for swelling or leakage." }],
+    rule: null, ruleNote: "이 문서에는 충전 중단 조건 칸의 원문이 없습니다.",
+    speaker: "품질안전팀 (규정 원본 작성 부서)", ver: "개정 2판",
+    src: { file: "REG-SAF-0390_rev2.pdf", page: "p.6", sha: "c7a19e04b3f2d8615a0e9c4b7d2f1a3e6c5b8d0a9f7e2c4b1d3a6e8f0c2b5d97", issued: "2023-06-21", basis: "pdf_text" },
+    related: [], check: [] },
+  { id: "MAN-CHG-210", sec: "§6.1", group: "man", kind: "제품 매뉴얼", title: "급속 충전기 사용 설명서",
+    owner: "제품기술팀", date: "2026.01.09", rank: 2, state: "text", chips: ["charger", "error-code"],
+    parts: [{ t: "If the display shows T-55, " }, { t: "charging has been interrupted because a cell temperature exceeded the limit", hit: true }, { t: ". Do not disconnect the cable until the indicator turns blue. The unit " }, { t: "will normally", flag: "hedge" }, { t: " resume within 10 minutes." }],
+    rule: [{ t: "Error code table: T-55 cell over-temperature; T-60 ambient over-temperature; T-70 sensor fault." }],
+    speaker: "제품기술팀 (매뉴얼 발행 부서)", ver: "v4.2",
+    src: { file: "MAN-CHG-210_v4.2_en.pdf", page: "p.38", sha: "2b8d6f0a4c1e9e37d5a2b0c8f6e4d1a3b9c7e5f2a0d8c6b4e1f3a5d7c9b2e086", issued: "2026-01-09", basis: "pdf_text" },
+    related: [{ id: "REG-SAF-0412 §3.2", who: "품질안전팀", text: "…shall stop the charging current when any cell temperature exceeds 55 °C…" }],
+    check: [{ lbl: "표시 코드", ev: [["§6.1", "If the display shows T-55, charging has been interrupted…"]] }] },
+  { id: "MAN-PCK-055", sec: "§9.3", group: "man", kind: "제품 매뉴얼", title: "배터리 팩 정비 안내",
+    owner: "서비스지원팀", date: "2025.08.30", rank: 6, state: "text", chips: ["battery-pack", "maintenance"],
+    parts: [{ t: "The battery management system " }, { t: "limits charging power as cell temperature rises", hit: true }, { t: " and stops charging at the upper limit specified for the pack variant." }],
+    rule: [{ t: "Upper limits by variant are listed in Appendix C." }],
+    speaker: "서비스지원팀 (매뉴얼 발행 부서)", ver: "v2.0",
+    src: { file: "MAN-PCK-055_v2.0_en.pdf", page: "p.71", sha: "e5f3a1c9b7d0e2f4a6c8b1d3e5f7a9c0b2d4e6f8a1c3b5d7e9f0a2c4b6d8e1f3", issued: "2025-08-30", basis: "pdf_text" },
+    related: [], check: [] }
+];
+const STATE = { text: "조항 원문 있음", stated: "언급만 있음", none: "조항 원문 없음" };
+const GROUPS = [["reg", "사내 규정", "합친 순위 상위 100 안에서 최대 5건"], ["man", "제품 매뉴얼", "합친 순위 상위 10건"]];
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const plain = (parts) => parts.map((p) => p.t).join("");
+const rich = (parts) => parts.map((p) => p.hit ? `<mark class="hit">${esc(p.t)}</mark>`
+  : p.flag ? `<span class="flag ${p.flag}">${esc(p.t)}</span>` : esc(p.t)).join("");
+const flagsOf = (...lists) => [...new Set(lists.flat().filter(Boolean).filter((p) => p.flag).map((p) => p.flag))];
+
+const listEl = document.getElementById("list"), detailEl = document.getElementById("detail"), split = document.getElementById("split");
+let current = DOCS[0].id;
+
+function renderList() {
+  listEl.innerHTML = GROUPS.map(([g, name, sub]) => {
+    const docs = DOCS.filter((d) => d.group === g).sort((a, b) => a.rank - b.rank);
+    return `<div class="list-group"><div class="list-head"><h2>${name}</h2><span>${sub}</span></div>${docs.map((d) => `
+      <button type="button" class="item" data-id="${d.id}" aria-current="${d.id === current}">
+        <span class="item-top"><span class="docid">${d.id}</span><span class="who">${esc(d.title)}</span><span class="date">${d.date}</span></span>
+        <span class="snip" lang="en">${esc(plain(d.parts))}</span>
+        <span class="item-bottom"><span class="rank">#${d.rank}</span><span class="state ${d.state}">${STATE[d.state]}</span>${d.related.length ? `<span class="mark-n">관련 조항 ${d.related.length}</span>` : ""}</span>
+      </button>`).join("")}</div>`;
+  }).join("");
+}
+
+function renderDetail() {
+  const d = DOCS.find((x) => x.id === current);
+  const flags = flagsOf(d.parts, d.rule);
+  detailEl.innerHTML = `
+    <button type="button" class="btn ghost small mobile-back" id="back">← 목록</button>
+    <div class="d-head">
+      <div class="row"><span class="tag">전체 순위 ${d.rank}</span><span class="tag">${d.kind}</span><span class="who">시행 ${d.date}</span></div>
+      <div class="row"><span class="docid">${d.id}</span><span class="docid" style="font-size:var(--fs-l);color:var(--ink-2)">${d.sec}</span></div>
+      <div class="row"><h2 class="title">${esc(d.title)}</h2><span class="who">${esc(d.owner)} · ${esc(d.ver)}</span></div>
+      <div class="chips">${d.chips.map((c) => `<span class="chip">${c}</span>`).join("")}</div>
+    </div>
+
+    <article class="block">
+      <div class="block-title"><h3>본문 발췌 (원문)</h3><span class="mark-n">질의와 맞닿은 구간 표시</span></div>
+      <p class="byline">말한 주체 <b>${esc(d.speaker)}</b> · <span class="mono">${d.id} ${d.sec}</span></p>
+      <div class="src-field"><span class="lbl">본문</span><p class="source-text" lang="en">${rich(d.parts)}</p></div>
+      ${flags.length ? `<div class="flag-list">${flags.map((f) => `<span class="flagtag ${f}"><i aria-hidden="true"></i>${f === "hedge" ? "유보 표현" : "불명확 표현"}</span>`).join("")}<span class="flaghint">글에 이 표현이 있다는 표시이며 판단이 아닙니다</span></div>` : ""}
+    </article>
+
+    <article class="block ev-block ${d.state}">
+      <div class="block-title"><h3>세부 기준 조항</h3><span class="state ${d.state}">${STATE[d.state]}</span></div>
+      <p class="byline">말한 주체 <b>${esc(d.speaker)}</b> · ${esc(d.ver)}</p>
+      ${d.rule ? `<p class="source-text" lang="en">${rich(d.rule)}</p>` : `<p class="status-line">${esc(d.ruleNote)}</p>`}
+      <details class="more"><summary>출처 자세히</summary>
+        <dl class="kv"><dt>파일</dt><dd>${d.src.file}</dd><dt>쪽</dt><dd>${d.src.page}</dd><dt>sha256</dt><dd>${d.src.sha}</dd><dt>시행일</dt><dd>${d.src.issued}</dd><dt>글 정리 방식</dt><dd>${d.src.basis}</dd></dl>
+      </details>
+    </article>
+
+    ${d.related.length ? `<article class="block">
+      <div class="block-title"><h3>연결된 조항</h3><span class="mark-n">${d.related.length}건 연결</span></div>
+      ${d.related.map((r) => `<div class="rel"><p class="byline">말한 주체 <b>${esc(r.who)}</b> · <span class="mono">${r.id}</span></p><p class="source-text" lang="en">${esc(r.text)}</p></div>`).join("")}
+    </article>` : ""}
+
+    ${d.check.length ? `<article class="block">
+      <div class="block-title"><h3>확인 항목</h3></div>
+      <p class="flaghint">근거 원문을 나란히 보여 줄 뿐, 같다·다르다를 표시하지 않습니다</p>
+      <div class="check">${d.check.map((c) => `<div class="check-item"><span class="lbl">${c.lbl}</span><div class="ev">${c.ev.map(([f, t]) => `<div class="ev-row"><span class="f">${f}</span><span class="t" lang="en">${esc(t)}</span></div>`).join("")}${c.more ? `<span class="ev-more">${c.more}</span>` : ""}</div></div>`).join("")}</div>
+    </article>` : ""}
+
+    <footer class="prov" aria-label="출처 꼬리">
+      <span>build b-20261028.3</span><span>index sha256 7e1a…c94f</span><span>snapshot 2026-10-28</span><span>embed bge-m3</span><span>q="battery charging must stop when…"</span><span>(예시 값)</span>
+    </footer>`;
+  document.getElementById("back").addEventListener("click", () => {
+    split.classList.remove("mobile-detail");
+    listEl.querySelector(`[data-id="${current}"]`)?.focus();
+  });
+}
+
+listEl.addEventListener("click", (e) => {
+  const btn = e.target.closest(".item"); if (!btn) return;
+  current = btn.dataset.id;
+  listEl.querySelectorAll(".item").forEach((b) => b.setAttribute("aria-current", String(b.dataset.id === current)));
+  renderDetail(); detailEl.scrollTop = 0;
+  if (matchMedia("(max-width: 767px)").matches) { split.classList.add("mobile-detail"); window.scrollTo(0, 0); document.getElementById("back").focus(); }
+});
+document.querySelectorAll(".tabs button").forEach((t) => t.addEventListener("click", () =>
+  document.querySelectorAll(".tabs button").forEach((b) => b.setAttribute("aria-selected", String(b === t)))));
+renderList(); renderDetail();
+</script>
+</body>
+</html>

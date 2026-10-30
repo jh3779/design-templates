@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRT Terminal</title>
+<meta name="color-scheme" content="dark">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.39.3/dist/galmuri.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+/* ================================================================
+   crt-terminal — tokens extracted from rag-project
+   Single dark theme by design (the source has one look: dark room,
+   beige bezel, amber phosphor, cream paper).
+   ================================================================ */
+:root {
+  /* Core palette — disclosure_lit/demo/static/retro.css:13-21 */
+  --terminal-room: #101112;
+  --terminal-bezel: #d5cdbb;
+  --terminal-screen: #101410;
+  --terminal-amber: #ffc56b;
+  --terminal-dim: #c3a26e;
+  --terminal-paper: #faf8f2;
+  --terminal-ink: #242a30;
+
+  /* Room text — retro.css:37, 42, 55, 57 */
+  --room-text: #e7dfcf;
+  --room-title: #eee7d8;
+  --room-caption: #c1bbaf;
+  --room-tab: #b6b1a5;
+
+  /* Bezel / monitor shell — retro.css:61-65, 211, 216, 218-219 */
+  --bezel-hi: #e4ddcf;
+  --bezel-lo: #c6bdab;
+  --bezel-edge: #eee5d3;
+  --bezel-foot: #a59c89;
+  --bezel-label: #5a5244;
+  --bezel-model: #817562;
+  --led-off: #817c70;
+  --led-on: #f8b853;
+  --led-glow: #df8d3180;
+
+  /* Screen internals — retro.css:72, 140, 148-149, 158, 198, 200 */
+  --crt-rim: #4a493e;
+  --crt-rule: #c3a26e33;
+  --crt-field: #191d17;
+  --crt-field-line: #8c784e;
+  --crt-placeholder: #b4a17e;
+  --crt-alert: #25261f;
+  --crt-idle: #978467;
+  --on-amber: #292015;
+
+  /* Paper / printout — retro.css:271, 279, 300, 320, 329, 335, 338-342 */
+  --printer-slot: #171915;
+  --printer-shadow: #867e6f;
+  --paper-hole: #d4cfc1;
+  --paper-rule: #d6d1c5;
+  --paper-caption: #626760;
+  --paper-link: #2f5fa8;
+  --paper-card: #fffdf7;
+  --paper-note: #eee9dc;
+  --paper-note-line: #d1c7b0;
+  --paper-note-icon: #79603a;
+
+  /* Streamlit theme (light paper base) — .streamlit/config.toml:3-7 */
+  --theme-primary: #b98a45;
+  --theme-secondary-bg: #efede6;
+
+  /* Type — retro.css:1-12, 23, 49-52, 136-141, 212-214 */
+  --font-ui: "Pretendard Variable", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  --font-pixel: "Galmuri11", "DungGeunMo", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* Radius — retro.css:63, 73, 150, 244, 262, 390 */
+  --r-monitor: 24px;
+  --r-monitor-sm: 17px;
+  --r-screen: 10px;
+  --r-control: 4px;
+  --r-paper: 3px;
+
+  /* Spacing — retro.css:40, 60, 71, 78, 243, 389-392 */
+  --container: 960px;
+  --monitor-pad: 24px 26px 16px;
+  --monitor-pad-sm: 12px 12px 13px;
+  --screen-pad: 1.7rem 1.8rem;
+  --screen-pad-sm: 1rem .85rem;
+  --paper-pad: 1.8rem 2.2rem;
+  --paper-pad-sm: 1.3rem 1.2rem;
+  --gap-screen: .85rem;
+  --tap: 44px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-ui);
+  color: var(--room-text);
+  background-color: var(--terminal-room);
+  /* Source used a photo of a dark room under a 3-stop scrim (retro.css:30-32).
+     Ported as pure gradients: warm spill behind the monitor, scrim on top. */
+  background-image:
+    linear-gradient(180deg, #101112b8 0%, #10111266 44%, #10111299 100%),
+    radial-gradient(60% 45% at 50% 18%, #3a352a 0%, transparent 70%),
+    radial-gradient(80% 60% at 50% 110%, #2b261d 0%, transparent 70%),
+    linear-gradient(180deg, #1b1b1a, #141413);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+.page { max-width: var(--container); margin: 0 auto; padding: 3rem 1rem 4rem; }
+
+/* ---------- header ---------- */
+.eyebrow { font-family: var(--font-pixel); color: var(--terminal-dim); font-size: .75rem; letter-spacing: .12em; margin: 0; }
+h1 {
+  color: var(--room-title); font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 600;
+  letter-spacing: -.035em; margin: .35rem 0 .7rem; padding-top: .35rem;
+}
+.lede { color: var(--room-caption); font-size: .875rem; line-height: 1.65; margin: 0; word-break: keep-all; }
+.tabs { display: flex; gap: 1.6rem; margin: 1.6rem 0 2.6rem; border-bottom: 1px solid #ffffff14; }
+.tab {
+  font: inherit; font-size: .875rem; color: var(--room-tab); background: none; border: 0;
+  padding: .6rem 0; min-height: var(--tap); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tab[aria-selected="true"] { color: var(--terminal-amber); border-bottom-color: var(--terminal-amber); font-weight: 600; }
+.tab:focus-visible { outline: 2px solid var(--terminal-amber); outline-offset: 3px; }
+
+/* ---------- monitor (bezel) — retro.css:59-67 ---------- */
+.monitor {
+  display: flex; flex-direction: column; gap: .9rem;
+  padding: var(--monitor-pad);
+  border: 1px solid var(--bezel-edge);
+  border-bottom: 5px solid var(--bezel-foot);
+  border-radius: var(--r-monitor);
+  background: linear-gradient(135deg, var(--bezel-hi), var(--terminal-bezel) 68%, var(--bezel-lo));
+  box-shadow: 0 24px 64px #0007, inset 0 0 0 2px #f3ecde55;
+}
+
+/* ---------- CRT glass — retro.css:68-132 ---------- */
+.crt {
+  position: relative; display: flex; flex-direction: column; gap: var(--gap-screen);
+  min-height: 350px; padding: var(--screen-pad);
+  background: var(--terminal-screen); color: var(--terminal-amber);
+  border: 2px solid var(--crt-rim); border-radius: var(--r-screen);
+  box-shadow: inset 0 0 60px #0008;
+  transform-origin: center; overflow: hidden;
+}
+.crt::before, .crt::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 5;
+}
+/* grain tile (feTurbulence inline SVG, retro.css:91) */
+.crt::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='table' tableValues='0 0 .9 1'/%3E%3CfeFuncG type='table' tableValues='0 0 .9 1'/%3E%3CfeFuncB type='table' tableValues='0 0 .9 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Cpath fill='white' filter='url(%23grain)' d='M0 0h160v160H0z'/%3E%3C/svg%3E");
+  background-size: 160px 160px; opacity: 0; transition: opacity .2s;
+}
+/* tracking band + scanlines + glass glare */
+.crt::after {
+  background:
+    linear-gradient(transparent 35%, #ffc56b05 42%, #ffe4b729 48%, #0005 50%, #ffe4b71c 52%, transparent 60%),
+    repeating-linear-gradient(0deg, #00000030 0 1px, #ffc56b08 1px 2px, transparent 2px 3px),
+    radial-gradient(ellipse at 0 0, #ffffff09, transparent 65%);
+  background-size: 100% 72px, 100% 3px, 100% 100%;
+  background-position: 50% -72px, 0 0, 0 0;
+  background-repeat: no-repeat, repeat, no-repeat;
+  opacity: .45; transition: opacity .2s;
+}
+.crt.is-on::before { opacity: .17; animation: crtGrain .64s steps(1, end) infinite; }
+.crt.is-on::after  { opacity: 1; animation: crtTracking 9s linear infinite; }
+/* quiet the texture while typing — retro.css:115-121 */
+.crt.is-on:has(:is(input, textarea, select):focus)::before { opacity: .055; }
+.crt.is-on:has(:is(input, textarea, select):focus)::after {
+  opacity: .55; background-size: 0 0, 100% 3px, 100% 100%; animation-play-state: paused;
+}
+.crt.powering { animation: crtOn .65s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes crtGrain {
+  0%, 100% { background-position: 0 0; }
+  20% { background-position: -37px 19px; }
+  40% { background-position: 23px -41px; }
+  60% { background-position: -13px 47px; }
+  80% { background-position: 43px -11px; }
+}
+@keyframes crtTracking {
+  0%, 78% { background-position: 50% -72px, 0 0, 0 0; }
+  96%, 100% { background-position: 50% calc(100% + 72px), 0 0, 0 0; }
+}
+/* power-on.css:1-6 */
+@keyframes crtOn {
+  0% { transform: scale(1, .008); filter: brightness(2); opacity: .5; }
+  35% { transform: scale(1, .008); filter: brightness(2); opacity: 1; }
+  75% { transform: scale(1, 1); filter: brightness(1.15); }
+  100% { transform: scale(1, 1); filter: brightness(1); }
+}
+
+/* boot header — retro.css:135-143 */
+.boot {
+  font-family: var(--font-pixel); font-size: .8rem; color: var(--terminal-dim);
+  padding-bottom: .85rem; border-bottom: 1px solid var(--crt-rule); line-height: 1.8; margin: 0;
+}
+.boot strong { color: var(--terminal-amber); font-weight: 400; display: block; font-size: .875rem; }
+.cursor { display: inline-block; width: .55em; height: 1em; vertical-align: -.15em; background: var(--terminal-amber); margin-left: .2em; animation: blink 1.05s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* disclosure */
+.crt details { border: 1px solid transparent; border-radius: var(--r-control); }
+.crt details[open] { border-color: #c3a26e44; }
+.crt summary {
+  min-height: var(--tap); display: flex; align-items: center; gap: .6rem; padding: 0 .9rem;
+  cursor: pointer; font-size: .875rem; font-weight: 600; list-style: none; border-radius: var(--r-control);
+}
+.crt summary::-webkit-details-marker { display: none; }
+.crt summary::before { content: "›"; font-size: 1.1rem; transition: transform .15s; }
+.crt details[open] summary::before { transform: rotate(90deg); }
+.crt details p { margin: 0; padding: 0 .9rem .9rem 2.1rem; color: var(--terminal-dim); font-size: .85rem; line-height: 1.7; word-break: keep-all; }
+
+/* fields — retro.css:145-184 */
+.field { display: flex; flex-direction: column; gap: .45rem; min-width: 0; }
+.field-label { font-size: .875rem; font-weight: 600; color: var(--terminal-amber); display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+.field-label small { font-family: var(--font-pixel); font-weight: 400; font-size: .7rem; color: var(--terminal-dim); letter-spacing: .04em; }
+.select-wrap { position: relative; }
+.select-wrap::after {
+  content: ""; position: absolute; right: 16px; top: 50%; width: 7px; height: 7px; margin-top: -6px;
+  border-right: 2px solid var(--terminal-amber); border-bottom: 2px solid var(--terminal-amber);
+  transform: rotate(45deg); pointer-events: none;
+}
+.crt select, .crt textarea {
+  width: 100%; font: inherit; font-size: .9rem; font-weight: 600;
+  background: var(--crt-field); border: 1px solid var(--crt-field-line); border-radius: var(--r-control);
+  color: var(--terminal-amber); caret-color: var(--terminal-amber);
+}
+.crt select { appearance: none; min-height: var(--tap); padding: 0 2.6rem 0 .75rem; cursor: pointer; }
+.crt select option { background: var(--crt-field); }
+.crt textarea { min-height: 92px; padding: .85rem .9rem; resize: vertical; line-height: 1.6; }
+.crt textarea::placeholder { color: var(--crt-placeholder); font-weight: 400; }
+.chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+
+/* buttons — retro.css:160-176 */
+.crt button {
+  min-height: var(--tap); font: inherit; font-size: .85rem; font-weight: 600;
+  color: var(--terminal-amber); background: transparent;
+  border: 1px solid var(--crt-field-line); border-radius: var(--r-control);
+  padding: .4rem .75rem; cursor: pointer; transition: background .15s; text-align: left;
+  word-break: keep-all; overflow-wrap: anywhere; max-width: 100%;
+}
+.crt button:hover { background: #ffc56b15; }
+.crt button[aria-pressed="true"] { background: #ffc56b22; }
+.crt .btn-primary { background: var(--terminal-amber); color: var(--on-amber); padding: .45rem 1.8rem; border-color: var(--terminal-amber); }
+.crt .btn-primary:hover { background: #ffd18a; }
+.crt button:disabled { opacity: .45; cursor: default; }
+:is(.crt button, .crt select, .crt textarea, .crt summary):focus-visible {
+  outline: 2px solid var(--terminal-amber); outline-offset: 3px;
+}
+.crt textarea:focus, .crt select:focus { outline: 2px solid var(--terminal-amber); outline-offset: 3px; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: .9rem; }
+.hint { font-family: var(--font-pixel); font-size: .7rem; color: var(--terminal-dim); letter-spacing: .04em; }
+
+/* bezel strip — retro.css:206-219 */
+.bezel {
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  color: var(--bezel-label); font-family: var(--font-pixel); font-size: .68rem; letter-spacing: .04em;
+}
+.model { margin-left: .65rem; color: var(--bezel-model); }
+.status { display: inline-flex; gap: .55rem; align-items: center; white-space: nowrap; }
+.led { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--led-off); box-shadow: inset 0 1px 2px #0005; }
+.led.on { background: var(--led-on); box-shadow: 0 0 8px var(--led-glow), inset 0 0 1px #fff; }
+.power {
+  font: inherit; font-size: inherit; letter-spacing: inherit; color: var(--bezel-label);
+  display: inline-flex; align-items: center; gap: .45rem;
+  min-height: 32px; padding: 0 .7rem; margin: -6px 0;
+  background: linear-gradient(180deg, var(--bezel-edge), var(--terminal-bezel));
+  border: 1px solid var(--bezel-foot); border-radius: var(--r-control);
+  box-shadow: 0 1px 0 #fff8 inset, 0 2px 3px #0002; cursor: pointer;
+}
+.power:hover { background: var(--bezel-edge); }
+.power:active { transform: translateY(1px); box-shadow: inset 0 1px 3px #0003; }
+.power:focus-visible { outline: 2px solid var(--terminal-ink); outline-offset: 2px; }
+
+/* ---------- printer — retro.css:249-281, print-feed.css ---------- */
+.printer { position: relative; isolation: isolate; margin-top: .75rem; }
+.printer-mouth {
+  position: relative; z-index: 2; height: 26px; margin: 0 -6px;
+  border: 1px solid var(--bezel-edge); border-bottom-color: var(--printer-shadow);
+  border-radius: 5px 5px 3px 3px;
+  background: linear-gradient(180deg, var(--bezel-hi), var(--terminal-bezel));
+  box-shadow: 0 5px 9px #0006;
+}
+.printer-mouth::after {
+  content: ""; position: absolute; inset: 11px 5px 0; border-radius: 3px 3px 0 0;
+  background: var(--printer-slot); box-shadow: inset 0 3px 5px #000b;
+}
+.printout {
+  position: relative; margin-top: -2px; min-width: 0;
+  padding: var(--paper-pad); color: var(--terminal-ink);
+  background-color: var(--terminal-paper);
+  background-image:
+    radial-gradient(circle at 10px 11px, var(--paper-hole) 2.5px, transparent 3px),
+    radial-gradient(circle at calc(100% - 10px) 11px, var(--paper-hole) 2.5px, transparent 3px);
+  background-size: 100% 24px;
+  border-radius: var(--r-paper); box-shadow: 0 12px 30px #0004;
+  transform-origin: top center;
+}
+.printout.feeding { animation: paperFeed 1s cubic-bezier(.16, 1, .3, 1) backwards; }
+.printout.feeding:focus-within { clip-path: none !important; transform: none !important; }
+@keyframes paperFeed {
+  from { transform: translateY(-24px); clip-path: inset(0 0 100% 0); }
+  to { transform: translateY(0); clip-path: inset(-32px -32px -48px -32px); }
+}
+.printout :is(p, li) { word-break: keep-all; overflow-wrap: anywhere; }
+.context { padding-bottom: 1rem; border-bottom: 1px solid var(--paper-rule); font-size: .85rem; color: var(--paper-caption); line-height: 1.65; }
+.context b { color: var(--terminal-ink); font-weight: 600; }
+.printout h2 { font-size: 1.45rem; line-height: 1.4; font-weight: 650; letter-spacing: -.025em; margin: 0; padding: 1.1rem 0 .5rem; }
+.printout h3 { font-size: 1rem; line-height: 1.5; font-weight: 650; margin: 0; padding: .4rem 0 .35rem; display: flex; align-items: center; gap: .45rem; }
+.caption { color: var(--paper-caption); font-size: .85rem; line-height: 1.7; margin: 0 0 .9rem; }
+.stamp {
+  display: inline-block; font-family: var(--font-pixel); font-size: .68rem; letter-spacing: .06em;
+  color: var(--paper-note-icon); border: 1px solid var(--paper-note-line); border-radius: var(--r-paper);
+  padding: .15rem .45rem; background: var(--paper-note);
+}
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem 2.4rem; margin: .4rem 0 1rem; }
+.cols ul { margin: .3rem 0 .4rem; padding-left: 1.3rem; line-height: 1.7; font-size: .975rem; }
+.meta { font-size: .8rem; color: var(--paper-caption); font-variant-numeric: tabular-nums; }
+.meta span { font-size: .68rem; margin-right: .35rem; }
+.tag { font-size: .7rem; font-weight: 650; color: var(--paper-note-icon); border: 1px solid var(--paper-note-line); border-radius: 999px; padding: .05rem .5rem; }
+.printout details { background: var(--paper-card); border: 1px solid var(--paper-rule); border-radius: 8px; margin-top: .6rem; }
+.printout summary { min-height: var(--tap); display: flex; align-items: center; gap: .6rem; padding: 0 1rem; cursor: pointer; font-size: .875rem; list-style: none; border-radius: 8px; }
+.printout summary::-webkit-details-marker { display: none; }
+.printout summary::before { content: "›"; transition: transform .15s; }
+.printout details[open] summary::before { transform: rotate(90deg); }
+.printout details blockquote { margin: 0; padding: 0 1rem 1rem 2.1rem; font-size: .875rem; line-height: 1.75; color: #3c4248; }
+.printout a { color: var(--paper-link); text-underline-offset: .2em; }
+:is(.printout a, .printout summary):focus-visible { outline: 2px solid var(--paper-link); outline-offset: 3px; }
+.note {
+  display: flex; gap: .7rem; align-items: flex-start; margin-top: 1.2rem; padding: 1rem 1.1rem;
+  background: var(--paper-note); border: 1px solid var(--paper-note-line); border-radius: 8px;
+  font-size: .925rem; line-height: 1.7;
+}
+.note svg { flex: none; color: var(--paper-note-icon); margin-top: .2rem; }
+.tear {
+  height: 12px; margin: 1.6rem calc(-1 * 2.2rem) calc(-1 * 1.8rem);
+  background:
+    linear-gradient(135deg, var(--terminal-paper) 50%, transparent 50%) 0 0 / 12px 12px repeat-x,
+    linear-gradient(225deg, var(--terminal-paper) 50%, transparent 50%) 0 0 / 12px 12px repeat-x;
+  transform: translateY(12px);
+}
+.foot { margin-top: 2.6rem; text-align: center; font-family: var(--font-pixel); font-size: .68rem; color: var(--crt-idle); letter-spacing: .08em; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- responsive — retro.css:388-397 ---------- */
+@media (max-width: 640px) {
+  .page { padding: 1.6rem .85rem 2rem; }
+  .tabs { gap: 1rem; margin-bottom: 1.8rem; }
+  .monitor { padding: var(--monitor-pad-sm); border-radius: var(--r-monitor-sm); }
+  .crt { padding: var(--screen-pad-sm); min-height: 0; }
+  .printout { padding: var(--paper-pad-sm); }
+  .tear { margin: 1.4rem -1.2rem -1.3rem; }
+  .bezel { font-size: .55rem; gap: .5rem; }
+  .model { display: none; }
+  .cols { grid-template-columns: 1fr; gap: 1.1rem; }
+  .crt button.chip { width: 100%; }
+}
+
+/* ---------- reduced motion — retro.css:398-409, power-on.css:8-10 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .crt, .crt *, .crt::before, .crt::after, .printout, .cursor {
+    animation: none !important; transition: none !important;
+  }
+  .crt.is-on::before { opacity: .055; }
+  .crt.is-on::after { opacity: .55; background-size: 0 0, 100% 3px, 100% 100%; }
+}
+</style>
+</head>
+<body>
+<main class="page">
+  <p class="eyebrow">FACT TERMINAL / 문서 대조 단말기</p>
+  <h1>문서 리터러시 어시스턴트</h1>
+  <p class="lede">항목을 고르고 떠도는 문장을 붙여넣으면, 실제 원문 기록과 대조해 뒷받침하는 사실과 배치되는 사실만 보여드립니다. 판단은 내리지 않으며 최종 결정은 언제나 사용자의 몫입니다.</p>
+
+  <nav class="tabs" role="tablist" aria-label="보기 전환">
+    <button class="tab" role="tab" aria-selected="true">팩트체크·표현통계</button>
+    <button class="tab" role="tab" aria-selected="false">사전</button>
+  </nav>
+
+  <!-- MONITOR -->
+  <section class="monitor" aria-label="입력 단말기">
+    <div class="crt is-on" id="crt">
+      <p class="boot" aria-live="polite"><strong id="bootTitle">대조 준비 완료<span class="cursor" aria-hidden="true"></span></strong><span id="bootSub">항목을 선택하고, 확인할 문장을 입력하세요.</span></p>
+
+      <details>
+        <summary>무엇을 보여드리나요?</summary>
+        <p>입력한 문장이 참인지 거짓인지는 판단하지 않습니다. 관련 원문 가운데 그 문장을 뒷받침하는 기록과 반박하는 기록을 있는 그대로 나눠 인쇄합니다.</p>
+      </details>
+
+      <label class="field">
+        <span class="field-label">대상 선택 <small>예시 데이터</small></span>
+        <span class="select-wrap">
+          <select id="target">
+            <option>가나다전자</option>
+            <option>라마바바이오</option>
+            <option>사아자모빌리티</option>
+          </select>
+        </span>
+      </label>
+
+      <div class="field">
+        <span class="field-label" id="chipsLabel">예시를 눌러보세요</span>
+        <div class="chips" role="group" aria-labelledby="chipsLabel">
+          <button class="chip" aria-pressed="true">유상증자를 검토 중이라는 소문이 있습니다.</button>
+          <button class="chip" aria-pressed="false">최근 전환사채를 발행했다고 들었습니다.</button>
+          <button class="chip" aria-pressed="false">신규 사업 진출설이 도는데 사실인가요?</button>
+        </div>
+      </div>
+
+      <label class="field">
+        <span class="field-label">소문 또는 원문 문장 <small id="count">0 / 200</small></span>
+        <textarea id="query" maxlength="200" placeholder="확인하고 싶은 문장을 그대로 붙여넣으세요.">유상증자를 검토 중이라는 소문이 있습니다.</textarea>
+      </label>
+
+      <div class="actions">
+        <button class="btn-primary" id="submit">확인</button>
+        <span class="hint">ENTER ⏎ 출력 · ESC 지우기</span>
+      </div>
+    </div>
+
+    <div class="bezel">
+      <span>FACT TERMINAL <span class="model">FT–01</span></span>
+      <span class="status">
+        <button class="power" id="power" aria-describedby="powerState">⏻ 다시 켜기</button>
+        <i class="led on" id="led" aria-hidden="true"></i><span id="powerState">전원 켜짐</span>
+      </span>
+    </div>
+  </section>
+
+  <!-- PRINTER -->
+  <section class="printer" aria-label="출력물">
+    <div class="printer-mouth" aria-hidden="true"></div>
+    <article class="printout" id="printout" tabindex="-1" aria-live="polite">
+      <p class="context">조회 기준 — 대상: <b id="ctxTarget">가나다전자</b> · 문장: “<span id="ctxQuery">유상증자를 검토 중이라는 소문이 있습니다.</span>” <span class="stamp">예시 출력</span></p>
+
+      <h2>원문 사실 대조</h2>
+      <p class="caption">입력하신 문장이 사실인지는 판단하지 않습니다. 관련 원문 중 그 내용을 뒷받침하는 것과 반박하는 것을 있는 그대로 나눠 보여드립니다. 근거로 채택된 원문 <b>2건</b> (예시)</p>
+
+      <div class="cols">
+        <div>
+          <h3>뒷받침하는 사실 <span class="tag">지지</span></h3>
+          <ul><li>신주 발행을 결정했다는 내용이 원문에 기재돼 있습니다.</li></ul>
+          <p class="meta"><span>주요사항보고서</span>· 2026-09-22</p>
+        </div>
+        <div>
+          <h3>배치되는 사실 <span class="tag">반박</span></h3>
+          <ul><li>발행 조건은 확정되지 않았다고 명시돼 있습니다.</li></ul>
+          <p class="meta"><span>정정신고서</span>· 2026-09-29</p>
+        </div>
+      </div>
+
+      <details>
+        <summary>근거 원문 — 주요사항보고서</summary>
+        <blockquote>“이사회는 운영자금 조달을 위해 제3자배정 방식의 신주 발행을 결의하였다. 세부 조건은 추후 확정 시 공시한다.” <a href="#printout">원문 위치로</a></blockquote>
+      </details>
+      <details>
+        <summary>근거 원문 — 정정신고서</summary>
+        <blockquote>“발행가액 및 배정 대상은 미확정 상태이며, 확정되는 즉시 정정 공시할 예정이다.” <a href="#printout">원문 위치로</a></blockquote>
+      </details>
+
+      <h2>이 표현이 가리키는 맥락</h2>
+      <div class="note">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+        <p style="margin:0">이 문장과 비슷한 상투구를 자료에서 찾지 못했습니다. 이 표현에 대한 맥락 정보는 표시하지 않습니다.</p>
+      </div>
+      <div class="tear" aria-hidden="true"></div>
+    </article>
+  </section>
+
+  <p class="foot">SAMPLE DATA · 모든 수치·날짜·기관명은 예시입니다</p>
+</main>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const crt = $("#crt"), led = $("#led"), state = $("#powerState");
+  const q = $("#query"), count = $("#count"), printout = $("#printout");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+
+  const updateCount = () => { count.textContent = `${q.value.length} / 200`; };
+  updateCount();
+  q.addEventListener("input", () => {
+    updateCount();
+    document.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c.textContent === q.value)));
+  });
+
+  document.querySelectorAll(".chip").forEach((chip) => chip.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", "false"));
+    chip.setAttribute("aria-pressed", "true");
+    q.value = chip.textContent; updateCount(); q.focus();
+  }));
+
+  // Replay the one-shot power-on (power-on.css is injected only on the click in the source).
+  $("#power").addEventListener("click", () => {
+    led.classList.remove("on"); state.textContent = "전원 꺼짐";
+    crt.classList.remove("is-on", "powering");
+    void crt.offsetWidth;
+    setTimeout(() => {
+      crt.classList.add("is-on", "powering");
+      led.classList.add("on"); state.textContent = "전원 켜짐";
+    }, reduce.matches ? 0 : 280);
+  });
+  crt.addEventListener("animationend", (e) => { if (e.target === crt) crt.classList.remove("powering"); });
+
+  // Print: only a fresh result feeds from the slot; re-reads stay still (terminal.py:54-58).
+  const print = () => {
+    if (!q.value.trim()) { q.focus(); return; }
+    $("#ctxTarget").textContent = $("#target").value;
+    $("#ctxQuery").textContent = q.value.trim();
+    printout.classList.remove("feeding"); void printout.offsetWidth;
+    printout.classList.add("feeding");
+    if (!reduce.matches) printout.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  printout.addEventListener("animationend", () => printout.classList.remove("feeding"));
+  $("#submit").addEventListener("click", print);
+  q.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); print(); }
+    if (e.key === "Escape") { q.value = ""; q.dispatchEvent(new Event("input")); }
+  });
+
+  // Simple tablist behavior (visual only in this template).
+  document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach((x) => x.setAttribute("aria-selected", String(x === t)));
+  }));
+})();
+</script>
+</body>
+</html>

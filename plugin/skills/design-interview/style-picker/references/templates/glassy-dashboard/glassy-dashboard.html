@@ -1,0 +1,513 @@
+<title>Glassy Dashboard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/* Layout: full-bleed rendered interior scene behind a frosted-glass app shell — top pill nav, left icon rail, 12-col card grid */
+:root {
+  color-scheme: dark;
+  --ink: #f6f1ea;
+  --ink-2: rgba(246, 241, 234, .72);
+  --ink-3: rgba(246, 241, 234, .48);
+  --glass: rgba(28, 26, 32, .34);
+  --glass-hi: rgba(255, 250, 244, .10);
+  --line: rgba(255, 248, 240, .16);
+  --line-soft: rgba(255, 248, 240, .08);
+  --ember: #ff9a4d;
+  --ember-2: #ffc785;
+  --good: #6fe3b0;
+  --bad: #ff8a8a;
+  --bg: #1b1714;
+  --f-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --f-body: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r-card: 22px;
+  --r-pill: 999px;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+#scene { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; }
+.vignette { position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 40%, transparent 50%, rgba(10, 8, 6, .55) 100%); }
+
+.glass {
+  background: linear-gradient(160deg, var(--glass-hi), transparent 40%), var(--glass);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(150%);
+  border: 1px solid var(--line);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 18px 40px -18px rgba(0, 0, 0, .55);
+}
+
+.app {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  gap: 18px;
+  max-width: 1440px; margin: 0 auto;
+  padding-block: 18px 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Top bar */
+.topbar { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; }
+.brand-mark { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center;
+  background: linear-gradient(140deg, var(--ember-2), var(--ember)); color: #2a1608; }
+.nav { margin: 0 auto; display: flex; gap: 4px; padding: 5px; border-radius: var(--r-pill); }
+.nav button {
+  font: 500 13px/1 var(--f-body); color: var(--ink-2);
+  background: transparent; border: 0; border-radius: var(--r-pill);
+  padding: 9px 16px; cursor: pointer; display: flex; align-items: center; gap: 7px;
+  transition: background .25s, color .25s;
+}
+.nav button:hover { color: var(--ink); background: var(--line-soft); }
+.nav button[aria-current="page"] { color: var(--ink); background: rgba(255, 250, 244, .16); box-shadow: inset 0 1px 0 rgba(255,255,255,.18); }
+.top-actions { display: flex; align-items: center; gap: 10px; }
+.icon-btn { width: 38px; height: 38px; border-radius: var(--r-pill); display: grid; place-items: center;
+  color: var(--ink-2); cursor: pointer; position: relative; }
+.icon-btn:hover { color: var(--ink); }
+.dot { position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 2px rgba(0,0,0,.3); }
+.btn-primary {
+  font: 500 13px/1 var(--f-body); color: #2a1608; border: 0; cursor: pointer;
+  padding: 11px 16px; border-radius: var(--r-pill); display: flex; align-items: center; gap: 6px;
+  background: linear-gradient(140deg, var(--ember-2), var(--ember));
+  box-shadow: 0 8px 24px -8px rgba(255, 154, 77, .8);
+  white-space: nowrap;
+}
+.avatar { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line);
+  background: linear-gradient(135deg, #c99a74, #6a4a3a); display: grid; place-items: center;
+  font: 600 13px/1 var(--f-body); color: #fff6ec; }
+
+/* Rail */
+.rail { grid-row: 2; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 10px 0; border-radius: var(--r-pill); align-self: start; position: sticky; top: calc(18px + env(safe-area-inset-top, 0px)); }
+.rail button { width: 44px; height: 44px; border-radius: 50%; border: 0; background: transparent;
+  color: var(--ink-3); display: grid; place-items: center; cursor: pointer; transition: .25s; }
+.rail button:hover { color: var(--ink); background: var(--line-soft); }
+.rail button[aria-pressed="true"] { color: #2a1608; background: linear-gradient(140deg, var(--ember-2), var(--ember)); }
+.rail hr { width: 22px; border: 0; border-top: 1px solid var(--line); margin: 6px 0; }
+
+button:focus-visible, .chip:focus-visible { outline: 2px solid var(--ember-2); outline-offset: 2px; }
+
+/* Main */
+.main { grid-row: 2; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 18px; align-content: start; min-width: 0; }
+.hello { grid-column: 1 / -1; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 18px 4px 6px; }
+.eyebrow { font: 500 11px/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+.hello h1 { margin: 10px 0 0; font: 400 clamp(34px, 5vw, 56px)/1.02 var(--f-display); letter-spacing: -.01em; text-wrap: balance; }
+.hello h1 em { color: var(--ember-2); }
+.scene-switch { display: flex; gap: 4px; padding: 4px; border-radius: var(--r-pill); }
+.chip { font: 500 12px/1 var(--f-body); color: var(--ink-2); border: 0; background: transparent;
+  padding: 8px 12px; border-radius: var(--r-pill); cursor: pointer; }
+.chip[aria-pressed="true"] { background: rgba(255, 250, 244, .16); color: var(--ink); }
+
+.card { border-radius: var(--r-card); padding: 20px; min-width: 0; transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.card-title { font-size: 14px; font-weight: 500; margin: 0; }
+.muted { color: var(--ink-3); font-size: 12px; }
+
+/* Stat cards */
+.stat { grid-column: span 3; display: flex; flex-direction: column; gap: 14px; }
+.stat:hover { transform: translateY(-5px); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 26px 50px -20px rgba(0,0,0,.65); }
+.stat-top { display: flex; align-items: center; justify-content: space-between; }
+.stat-icon { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; color: #fff; }
+.g-ember { background: linear-gradient(140deg, #ffb36b, #e9692c); }
+.g-sea { background: linear-gradient(140deg, #7cc7e8, #3c73b8); }
+.g-moss { background: linear-gradient(140deg, #9ee0a8, #3e9a72); }
+.g-plum { background: linear-gradient(140deg, #d6a2e8, #8a4fb8); }
+.stat-value { font: 500 30px/1 var(--f-body); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.stat-label { color: var(--ink-2); font-size: 13px; }
+.delta { display: inline-flex; align-items: center; gap: 4px; font: 500 12px/1 var(--f-mono); padding: 5px 8px; border-radius: var(--r-pill); }
+.delta.up { color: var(--good); background: rgba(111, 227, 176, .12); }
+.delta.down { color: var(--bad); background: rgba(255, 138, 138, .12); }
+.spark { width: 100%; height: 34px; display: block; }
+
+/* Chart */
+.chart-card { grid-column: span 8; }
+.seg { display: flex; gap: 2px; padding: 3px; border-radius: var(--r-pill); background: rgba(0,0,0,.18); border: 1px solid var(--line-soft); }
+.seg button { font: 500 12px/1 var(--f-mono); color: var(--ink-3); background: transparent; border: 0; padding: 7px 10px; border-radius: var(--r-pill); cursor: pointer; }
+.seg button[aria-pressed="true"] { color: var(--ink); background: rgba(255,250,244,.14); }
+.chart-total { display: flex; align-items: baseline; gap: 10px; margin: -4px 0 8px; flex-wrap: wrap; }
+.chart-total strong { font: 500 26px/1 var(--f-body); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.chart-wrap { width: 100%; overflow: hidden; }
+#chart { width: 100%; height: 240px; display: block; }
+#chart text { fill: var(--ink-3); font: 400 11px var(--f-mono); }
+
+/* Goal ring */
+.goal-card { grid-column: span 4; display: flex; flex-direction: column; }
+.ring-wrap { position: relative; width: 190px; max-width: 100%; aspect-ratio: 1; margin: 6px auto 16px; }
+.ring-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring-label { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.ring-label b { font: 400 44px/1 var(--f-display); }
+.ring-label span { color: var(--ink-3); font-size: 12px; margin-top: 4px; }
+.legend { display: grid; gap: 10px; margin-top: auto; }
+.legend-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+.legend-row i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
+.legend-row span:last-child { font-family: var(--f-mono); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+/* Orders table */
+.orders-card { grid-column: span 7; }
+.table-wrap { overflow-x: auto; margin: 0 -6px; }
+table { width: 100%; border-collapse: collapse; min-width: 480px; }
+th { text-align: left; font: 500 11px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); padding: 0 6px 10px; }
+td { padding: 12px 6px; border-top: 1px solid var(--line-soft); font-variant-numeric: tabular-nums; }
+td:last-child, th:last-child { text-align: right; }
+.cust { display: flex; align-items: center; gap: 10px; }
+.cust-av { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 600 11px/1 var(--f-body); color: #fff; flex: none; }
+.pill { font: 500 11px/1 var(--f-mono); padding: 5px 9px; border-radius: var(--r-pill); white-space: nowrap; }
+.pill.paid { color: var(--good); background: rgba(111,227,176,.12); }
+.pill.pending { color: var(--ember-2); background: rgba(255,199,133,.14); }
+.pill.refund { color: var(--bad); background: rgba(255,138,138,.12); }
+
+/* Messages */
+.msg-card { grid-column: span 5; }
+.msgs { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.msgs li { display: flex; gap: 12px; padding: 10px; border-radius: 14px; cursor: pointer; transition: background .2s; }
+.msgs li:hover { background: var(--line-soft); }
+.msgs .body { min-width: 0; flex: 1; }
+.msgs .row { display: flex; justify-content: space-between; gap: 8px; }
+.msgs .name { font-weight: 500; }
+.msgs .time { font: 400 11px var(--f-mono); color: var(--ink-3); white-space: nowrap; }
+.msgs p { margin: 2px 0 0; color: var(--ink-2); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.unread { width: 7px; height: 7px; border-radius: 50%; background: var(--ember); align-self: center; flex: none; }
+
+/* Entrance */
+@media (prefers-reduced-motion: no-preference) {
+  .card, .hello { animation: rise .7s cubic-bezier(.2,.8,.2,1) both; }
+  .main > *:nth-child(2) { animation-delay: .04s } .main > *:nth-child(3) { animation-delay: .08s }
+  .main > *:nth-child(4) { animation-delay: .12s } .main > *:nth-child(5) { animation-delay: .16s }
+  .main > *:nth-child(6) { animation-delay: .2s }  .main > *:nth-child(7) { animation-delay: .24s }
+  .main > *:nth-child(8) { animation-delay: .28s } .main > *:nth-child(9) { animation-delay: .32s }
+  @keyframes rise { from { transform: translateY(10px); } to { transform: none; } }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .stat { grid-column: span 6; }
+  .chart-card, .goal-card, .orders-card, .msg-card { grid-column: 1 / -1; }
+  .nav .lbl { display: none; }
+}
+@media (max-width: 720px) {
+  .app { grid-template-columns: minmax(0, 1fr); padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .main { grid-row: 2; grid-column: 1; gap: 14px; }
+  .nav, .top-actions .icon-btn, .btn-primary .lbl { display: none; }
+  .topbar { justify-content: space-between; }
+  .rail { position: fixed; top: auto; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%);
+    flex-direction: row; padding: 6px 10px; z-index: 5; }
+  .rail hr { width: 1px; height: 22px; border: 0; border-left: 1px solid var(--line); margin: 0 4px; }
+  .rail .extra { display: none; }
+}
+@media (max-width: 460px) {
+  .stat { grid-column: 1 / -1; }
+}
+</style>
+
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 18 12 5l8 13"/><path d="M8 13h8"/></svg></span>
+      Atrium
+    </div>
+    <nav class="nav glass" aria-label="Primary">
+      <button aria-current="page"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span class="lbl">Dashboard</span></button>
+      <button><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 12h18M3 17h12"/></svg><span class="lbl">Orders</span></button>
+      <button><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></svg><span class="lbl">Customers</span></button>
+      <button><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg><span class="lbl">Reports</span></button>
+      <button><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="lbl">Settings</span></button>
+    </nav>
+    <div class="top-actions">
+      <span class="icon-btn glass" role="button" tabindex="0" aria-label="Search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+      <span class="icon-btn glass" role="button" tabindex="0" aria-label="Notifications"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="dot"></span></span>
+      <button class="btn-primary"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">New product</span></button>
+      <span class="avatar" aria-label="Profile">MJ</span>
+    </div>
+  </header>
+
+  <aside class="rail glass" aria-label="Tools">
+    <button aria-pressed="true" aria-label="Overview"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></button>
+    <button aria-pressed="false" aria-label="Sales"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg></button>
+    <button aria-pressed="false" aria-label="Messages"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+    <button aria-pressed="false" aria-label="Calendar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></button>
+    <hr>
+    <button class="extra" aria-pressed="false" aria-label="Files"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2z"/></svg></button>
+    <button aria-pressed="false" aria-label="Help"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg></button>
+  </aside>
+
+  <main class="main">
+    <section class="hello">
+      <div>
+        <div class="eyebrow">Friday · 30 Oct 2026</div>
+        <h1>Good evening, <em>Minjun</em></h1>
+      </div>
+      <div class="scene-switch glass" role="group" aria-label="Background light">
+        <button class="chip" data-scene="dawn" aria-pressed="false">Dawn</button>
+        <button class="chip" data-scene="dusk" aria-pressed="true">Dusk</button>
+        <button class="chip" data-scene="night" aria-pressed="false">Night</button>
+      </div>
+    </section>
+
+    <article class="card glass stat">
+      <div class="stat-top">
+        <span class="stat-icon g-ember"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+        <span class="delta up">▲ 12.4%</span>
+      </div>
+      <div><div class="stat-value">$48,290</div><div class="stat-label">Revenue this month</div></div>
+      <svg class="spark" data-spark="18,22,20,27,25,31,29,36,34,41" data-color="#ffb36b" viewBox="0 0 100 34" preserveAspectRatio="none"></svg>
+    </article>
+    <article class="card glass stat">
+      <div class="stat-top">
+        <span class="stat-icon g-sea"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg></span>
+        <span class="delta up">▲ 8.1%</span>
+      </div>
+      <div><div class="stat-value">1,284</div><div class="stat-label">Orders</div></div>
+      <svg class="spark" data-spark="30,28,33,31,35,34,38,37,40,43" data-color="#7cc7e8" viewBox="0 0 100 34" preserveAspectRatio="none"></svg>
+    </article>
+    <article class="card glass stat">
+      <div class="stat-top">
+        <span class="stat-icon g-moss"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></svg></span>
+        <span class="delta up">▲ 3.6%</span>
+      </div>
+      <div><div class="stat-value">9,412</div><div class="stat-label">Active customers</div></div>
+      <svg class="spark" data-spark="40,41,40,42,43,42,44,45,45,47" data-color="#9ee0a8" viewBox="0 0 100 34" preserveAspectRatio="none"></svg>
+    </article>
+    <article class="card glass stat">
+      <div class="stat-top">
+        <span class="stat-icon g-plum"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></span>
+        <span class="delta down">▼ 0.4%</span>
+      </div>
+      <div><div class="stat-value">3.82%</div><div class="stat-label">Conversion rate</div></div>
+      <svg class="spark" data-spark="42,40,41,39,40,38,39,37,38,37" data-color="#d6a2e8" viewBox="0 0 100 34" preserveAspectRatio="none"></svg>
+    </article>
+
+    <article class="card glass chart-card">
+      <div class="card-head">
+        <h2 class="card-title">Revenue overview</h2>
+        <div class="seg" role="group" aria-label="Range">
+          <button data-range="7" aria-pressed="false">7D</button>
+          <button data-range="30" aria-pressed="true">30D</button>
+          <button data-range="90" aria-pressed="false">90D</button>
+        </div>
+      </div>
+      <div class="chart-total"><strong id="chartTotal">$48,290</strong><span class="muted" id="chartNote">last 30 days</span></div>
+      <div class="chart-wrap"><svg id="chart" role="img" aria-label="Revenue area chart"></svg></div>
+    </article>
+
+    <article class="card glass goal-card">
+      <div class="card-head"><h2 class="card-title">Monthly goal</h2><span class="muted">$60k target</span></div>
+      <div class="ring-wrap">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd59e"/><stop offset="1" stop-color="#ff7a2f"/></linearGradient></defs>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,248,240,.10)" stroke-width="10"/>
+          <circle id="ring" cx="60" cy="60" r="50" fill="none" stroke="url(#ringGrad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="314.16" stroke-dashoffset="62"/>
+        </svg>
+        <div class="ring-label"><b>80%</b><span>$48.3k reached</span></div>
+      </div>
+      <div class="legend">
+        <div class="legend-row"><span><i style="background:#ffb36b"></i>Online store</span><span>$31.6k</span></div>
+        <div class="legend-row"><span><i style="background:#7cc7e8"></i>Showroom</span><span>$12.1k</span></div>
+        <div class="legend-row"><span><i style="background:#d6a2e8"></i>Wholesale</span><span>$4.6k</span></div>
+      </div>
+    </article>
+
+    <article class="card glass orders-card">
+      <div class="card-head"><h2 class="card-title">Recent orders</h2><span class="muted">Example data</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Customer</th><th>Item</th><th>Status</th><th>Total</th></tr></thead>
+          <tbody>
+            <tr><td><div class="cust"><span class="cust-av g-ember">SY</span>Seoyeon Park</div></td><td>Linen lounge chair</td><td><span class="pill paid">Paid</span></td><td>$1,240.00</td></tr>
+            <tr><td><div class="cust"><span class="cust-av g-sea">DK</span>Daniel Kim</div></td><td>Oak coffee table</td><td><span class="pill pending">Pending</span></td><td>$680.00</td></tr>
+            <tr><td><div class="cust"><span class="cust-av g-moss">HL</span>Hana Lee</div></td><td>Travertine lamp</td><td><span class="pill paid">Paid</span></td><td>$320.00</td></tr>
+            <tr><td><div class="cust"><span class="cust-av g-plum">JC</span>Jiwoo Choi</div></td><td>Wool rug, 240×300</td><td><span class="pill refund">Refunded</span></td><td>$910.00</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="card glass msg-card">
+      <div class="card-head"><h2 class="card-title">Messages</h2><span class="muted">3 unread</span></div>
+      <ul class="msgs">
+        <li><span class="cust-av g-sea">DK</span><div class="body"><div class="row"><span class="name">Daniel Kim</span><span class="time">2m</span></div><p>Can the coffee table ship before the 6th? We're moving in that weekend.</p></div><span class="unread"></span></li>
+        <li><span class="cust-av g-moss">HL</span><div class="body"><div class="row"><span class="name">Hana Lee</span><span class="time">18m</span></div><p>The lamp arrived and it looks perfect by the window, thank you!</p></div><span class="unread"></span></li>
+        <li><span class="cust-av g-ember">SY</span><div class="body"><div class="row"><span class="name">Seoyeon Park</span><span class="time">1h</span></div><p>Is the lounge chair available in the sand colorway as well?</p></div><span class="unread"></span></li>
+        <li><span class="cust-av g-plum">JC</span><div class="body"><div class="row"><span class="name">Jiwoo Choi</span><span class="time">3h</span></div><p>Refund received. I'll reorder the smaller size next week.</p></div></li>
+      </ul>
+    </article>
+  </main>
+</div>
+
+<script>
+(() => {
+  /* ---------- Background scene: a room with floor-to-ceiling windows ---------- */
+  const SCENES = {
+    dawn:  { sky: ["#6d86b4", "#b9c3d6", "#f3d3b6"], sun: "rgba(255,226,190,.9)", hills: ["#7b8297", "#5a6177"], floor: ["#3a332d", "#1e1a17"], frame: "#17130f", warm: .55 },
+    dusk:  { sky: ["#2f3a5c", "#a7788a", "#ffb877"], sun: "rgba(255,170,90,.95)", hills: ["#5b4752", "#3a2d36"], floor: ["#2f241d", "#140f0c"], frame: "#120d0a", warm: 1 },
+    night: { sky: ["#070b18", "#18223e", "#3a3f63"], sun: "rgba(150,170,255,.35)", hills: ["#151a2c", "#0d1120"], floor: ["#14121a", "#08070b"], frame: "#050407", warm: .25 }
+  };
+  const cvs = document.getElementById("scene");
+  const ctx = cvs.getContext("2d");
+  let current = "dusk";
+
+  function rand(seed) { return () => (seed = (seed * 16807) % 2147483647) / 2147483647; }
+
+  function drawScene(s) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const W = innerWidth, H = innerHeight;
+    cvs.width = W * dpr; cvs.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const horizon = H * .62;
+
+    // sky
+    let g = ctx.createLinearGradient(0, 0, 0, horizon);
+    g.addColorStop(0, s.sky[0]); g.addColorStop(.6, s.sky[1]); g.addColorStop(1, s.sky[2]);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, horizon);
+
+    // stars at night
+    if (s === SCENES.night) {
+      const r = rand(7);
+      for (let i = 0; i < 160; i++) { ctx.fillStyle = `rgba(255,255,255,${r() * .7})`; ctx.fillRect(r() * W, r() * horizon * .8, 1.2, 1.2); }
+    }
+
+    // sun glow
+    g = ctx.createRadialGradient(W * .56, horizon, 0, W * .56, horizon, W * .5);
+    g.addColorStop(0, s.sun); g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, horizon);
+
+    // hills
+    s.hills.forEach((col, k) => {
+      const r = rand(11 + k * 31);
+      ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, horizon);
+      const base = horizon - H * (k ? .03 : .075);
+      for (let x = 0; x <= W + 40; x += 40) ctx.lineTo(x, base + Math.sin(x / (180 + k * 90) + k) * H * .025 + r() * H * .012);
+      ctx.lineTo(W, horizon); ctx.closePath(); ctx.fill();
+    });
+
+    // floor with soft sky reflection
+    g = ctx.createLinearGradient(0, horizon, 0, H);
+    g.addColorStop(0, s.floor[0]); g.addColorStop(1, s.floor[1]);
+    ctx.fillStyle = g; ctx.fillRect(0, horizon, W, H - horizon);
+    ctx.save(); ctx.globalAlpha = .18 * s.warm + .05;
+    g = ctx.createLinearGradient(0, horizon, 0, horizon + H * .22);
+    g.addColorStop(0, s.sky[2]); g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g; ctx.fillRect(W * .08, horizon, W * .84, H * .22); ctx.restore();
+
+    // ceiling band
+    g = ctx.createLinearGradient(0, 0, 0, H * .09);
+    g.addColorStop(0, s.frame); g.addColorStop(1, "rgba(0,0,0,.65)");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H * .085);
+
+    // window mullions + transom
+    ctx.fillStyle = s.frame;
+    const panes = W < 700 ? 3 : 5;
+    for (let i = 0; i <= panes; i++) { const x = (W / panes) * i; ctx.fillRect(x - 5, 0, 10, horizon + 4); }
+    ctx.fillRect(0, H * .085, W, 6);
+    ctx.fillRect(0, horizon - 2, W, 8);
+
+    // light spill on floor
+    ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = .12 * s.warm;
+    for (let i = 0; i < panes; i++) {
+      const x0 = (W / panes) * i + 8, x1 = (W / panes) * (i + 1) - 8;
+      ctx.fillStyle = s.sky[2]; ctx.beginPath();
+      ctx.moveTo(x0, horizon + 6); ctx.lineTo(x1, horizon + 6);
+      ctx.lineTo(x1 + (x1 - W / 2) * .5, H); ctx.lineTo(x0 + (x0 - W / 2) * .5, H); ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+
+    // furniture silhouettes
+    ctx.fillStyle = "rgba(10,8,7,.82)";
+    const round = (x, y, w, h, r) => { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fill(); };
+    round(-W * .04, H * .74, W * .3, H * .14, 18);          // sofa left
+    round(-W * .04, H * .69, W * .26, H * .08, 16);
+    round(W * .78, H * .73, W * .3, H * .15, 18);           // sofa right
+    round(W * .8, H * .68, W * .26, H * .08, 16);
+    ctx.fillStyle = "rgba(14,11,9,.9)";
+    ctx.beginPath(); ctx.ellipse(W * .5, H * .86, W * .13, H * .035, 0, 0, Math.PI * 2); ctx.fill(); // table
+    ctx.fillStyle = "rgba(255,190,120,.08)";
+    ctx.beginPath(); ctx.ellipse(W * .5, H * .85, W * .11, H * .022, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  const paint = () => drawScene(SCENES[current]);
+  paint();
+  let t; addEventListener("resize", () => { clearTimeout(t); t = setTimeout(paint, 120); });
+
+  document.querySelectorAll("[data-scene]").forEach(b => b.addEventListener("click", () => {
+    current = b.dataset.scene;
+    document.querySelectorAll("[data-scene]").forEach(x => x.setAttribute("aria-pressed", x === b));
+    paint();
+  }));
+
+  /* ---------- Toggles ---------- */
+  const group = (sel, attr) => document.querySelectorAll(sel).forEach(b => b.addEventListener("click", () => {
+    b.parentElement.querySelectorAll("button").forEach(x => x.setAttribute(attr, attr === "aria-current" ? (x === b ? "page" : "false") : x === b));
+  }));
+  group(".nav button", "aria-current");
+  group(".rail button", "aria-pressed");
+
+  /* ---------- Sparklines ---------- */
+  document.querySelectorAll(".spark").forEach((svg, i) => {
+    const v = svg.dataset.spark.split(",").map(Number), col = svg.dataset.color;
+    const min = Math.min(...v), max = Math.max(...v);
+    const pts = v.map((y, k) => [k / (v.length - 1) * 100, 30 - (y - min) / (max - min || 1) * 26]);
+    const d = pts.map((p, k) => (k ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+    svg.innerHTML = `<defs><linearGradient id="sp${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".35"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+      <path d="${d} L100 34 L0 34 Z" fill="url(#sp${i})"/>
+      <path d="${d}" fill="none" stroke="${col}" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>`;
+  });
+
+  /* ---------- Area chart ---------- */
+  const series = (n, seed, base, amp) => { const r = rand(seed); let v = base; return Array.from({ length: n }, (_, k) => (v += (r() - .42) * amp, Math.max(base * .4, v + Math.sin(k / 3) * amp * .6))); };
+  const DATA = { 7: series(7, 3, 1500, 220), 30: series(30, 5, 1350, 160), 90: series(90, 9, 1100, 110) };
+  const chart = document.getElementById("chart");
+  let range = 30;
+
+  function renderChart() {
+    const v = DATA[range], W = chart.clientWidth || 600, H = 240, pl = 44, pr = 12, pt = 12, pb = 26;
+    chart.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    const max = Math.ceil(Math.max(...v) / 500) * 500, min = 0;
+    const x = k => pl + k / (v.length - 1) * (W - pl - pr);
+    const y = val => pt + (1 - (val - min) / (max - min)) * (H - pt - pb);
+    let grid = "";
+    for (let i = 0; i <= 4; i++) {
+      const val = min + (max - min) * i / 4, yy = y(val);
+      grid += `<line x1="${pl}" x2="${W - pr}" y1="${yy}" y2="${yy}" stroke="rgba(255,248,240,.08)"/>`;
+      grid += `<text x="${pl - 8}" y="${yy + 4}" text-anchor="end">$${val >= 1000 ? (val / 1000).toFixed(1) + "k" : val}</text>`;
+    }
+    const step = Math.ceil(v.length / 6);
+    let xl = "";
+    for (let k = 0; k < v.length; k += step) xl += `<text x="${x(k)}" y="${H - 6}" text-anchor="middle">${range === 7 ? ["Sat","Sun","Mon","Tue","Wed","Thu","Fri"][k] : "D-" + (v.length - 1 - k)}</text>`;
+    // smooth path
+    let d = `M${x(0)} ${y(v[0])}`;
+    for (let k = 1; k < v.length; k++) { const cx = (x(k - 1) + x(k)) / 2; d += ` C${cx} ${y(v[k - 1])} ${cx} ${y(v[k])} ${x(k)} ${y(v[k])}`; }
+    const last = v.length - 1;
+    chart.innerHTML = `<defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9a4d" stop-opacity=".45"/><stop offset="1" stop-color="#ff9a4d" stop-opacity="0"/></linearGradient></defs>
+      ${grid}${xl}
+      <path d="${d} L${x(last)} ${y(0)} L${x(0)} ${y(0)} Z" fill="url(#area)"/>
+      <path d="${d}" fill="none" stroke="#ffc785" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="${x(last)}" cy="${y(v[last])}" r="9" fill="#ff9a4d" fill-opacity=".25"/>
+      <circle cx="${x(last)}" cy="${y(v[last])}" r="4.5" fill="#ffc785" stroke="#2a1608" stroke-width="2"/>`;
+    const total = v.reduce((a, b) => a + b, 0);
+    document.getElementById("chartTotal").textContent = "$" + Math.round(total).toLocaleString("en-US");
+    document.getElementById("chartNote").textContent = `last ${range} days`;
+  }
+  renderChart();
+  addEventListener("resize", renderChart);
+  document.querySelectorAll("[data-range]").forEach(b => b.addEventListener("click", () => {
+    range = +b.dataset.range;
+    document.querySelectorAll("[data-range]").forEach(x => x.setAttribute("aria-pressed", x === b));
+    renderChart();
+  }));
+})();
+</script>

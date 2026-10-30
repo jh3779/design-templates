@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mono Utility</title>
+<meta name="description" content="무채색 잉크 램프 + 유채 3종(danger/caution/affirm), 헤어라인 리스트, 카메라 셸 워터마크, 하단 고정 검정 알약 버튼의 현장 기록 앱 템플릿.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+/* =====================================================================
+   mono-utility — 토큰 (출처: snapproof, 값은 그대로 옮김)
+   단일 라이트 테마 — 원본 프로젝트가 라이트 전용(appColorScheme brightness: light)
+   ===================================================================== */
+:root {
+  color-scheme: light;
+
+  /* 무채색 램프 — apps/snapproof_app/lib/theme/app_colors.dart:10-20 */
+  --ink-0: #FFFFFF;
+  --ink-50: #F7F7F8;
+  --ink-100: #F1F1F3;
+  --ink-200: #E4E4E7;
+  --ink-300: #D2D2D7;
+  --ink-400: #A9A9B0;
+  --ink-500: #78787F;
+  --ink-600: #56565C;
+  --ink-700: #3C3C41;
+  --ink-800: #26262A;
+  --ink-900: #1A1A1D;
+
+  /* 유채 3종 — app_colors.dart:23-31 (이 외의 유채색 금지) */
+  --danger-600: #A8342B;  --danger-500: #C0453A;  --danger-100: #F8E9E7;
+  --caution-600: #8A6212; --caution-500: #A5761C; --caution-100: #F7EEDB;
+  --affirm-600: #2C6349;  --affirm-500: #367A59;  --affirm-100: #E3EFE9;
+
+  /* 시맨틱 — app_colors.dart:92-116 */
+  --surface: var(--ink-0);
+  --canvas: var(--ink-50);
+  --sunken: var(--ink-100);
+  --inverse: var(--ink-900);
+  --scrim: rgba(26, 26, 29, .478);         /* 0x7A1A1A1D */
+  --text-primary: var(--ink-900);
+  --text-secondary: var(--ink-600);
+  --text-tertiary: var(--ink-500);
+  --text-disabled: var(--ink-400);
+  --border-hairline: var(--ink-200);
+  --border-default: var(--ink-300);
+  --border-strong: var(--ink-700);
+
+  /* 카메라 표면 — app_colors.dart:112-115, .claude/skills/jjikjeung-design/tokens/colors.css:87-97 */
+  --camera-shell: #101012;
+  --camera-chip-bg: rgba(255, 255, 255, .92);
+  --camera-protect-top: linear-gradient(to bottom, rgba(16,16,18,.62), rgba(16,16,18,0));
+  --camera-protect-bottom: linear-gradient(to top, rgba(16,16,18,.72), rgba(16,16,18,0));
+  --watermark-plate: rgba(16, 16, 18, .72);
+  --watermark-outline: rgba(255, 255, 255, .28);
+
+  /* 타입 — tokens/typography.css:6-8, app_typography.dart:31-55 */
+  --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,
+               "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-numeric: "tnum" 1, "lnum" 1;
+
+  /* 간격 4px 그리드 — app_dimens.dart:7-28 */
+  --space-half: 2px; --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px;
+  --gutter-screen: 16px; --safe-bottom: 20px;
+
+  /* 반경 7단 — app_dimens.dart:38-44 */
+  --radius-xs: 4px; --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+  --radius-xl: 20px; --radius-xxl: 28px; --radius-full: 999px;
+
+  /* 엘리베이션: 그림자보다 헤어라인 — app_dimens.dart:67-80 */
+  --elev-1: 0 1px 2px rgba(26,26,29,.06);
+  --elev-3: 0 -2px 12px rgba(26,26,29,.10);
+  --elev-4: 0 8px 28px rgba(26,26,29,.16);
+
+  /* 크기 — app_dimens.dart:91-137 */
+  --app-bar: 56px; --btn-md: 48px; --btn-lg: 52px; --badge: 28px;
+  --row-3line: 102px; --shutter: 72px; --thumb-sm: 56px; --border-control: 1.5px;
+
+  /* 모션 — tokens/motion.css:4-8 */
+  --dur-fast: 120ms; --dur-base: 180ms; --dur-slow: 240ms;
+  --ease: cubic-bezier(.2, 0, 0, 1);
+
+  --column: 430px;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---------- base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--ink-200);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-feature-settings: var(--font-numeric);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--ink-900); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* 전화기 폭 컬럼 — 모바일에서는 전체 폭, 데스크톱에서는 가운데 */
+.app {
+  position: relative;
+  max-width: var(--column);
+  min-height: 100vh; min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--canvas);
+  padding-bottom: calc(160px + env(safe-area-inset-bottom));
+}
+@media (min-width: 600px) {
+  .app { border-left: 1px solid var(--border-default); border-right: 1px solid var(--border-default); }
+}
+
+/* ---------- 앱바 (56, titleMedium, 그림자 없음) ---------- */
+.appbar {
+  position: sticky; top: 0; z-index: 5;
+  height: var(--app-bar);
+  display: flex; align-items: center; gap: var(--space-1);
+  padding: 0 var(--space-1);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-hairline);
+}
+.appbar .titles { flex: 1; min-width: 0; }
+.appbar h1 { margin: 0; font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -.1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.appbar p { margin: 0; font-size: 13px; line-height: 18px; color: var(--text-tertiary); }
+.icon-btn {
+  width: 48px; height: 48px; flex: none;
+  display: inline-grid; place-items: center;
+  border: 0; background: transparent; border-radius: var(--radius-full); cursor: pointer;
+  transition: background var(--dur-fast) var(--ease);
+}
+.icon-btn:hover { background: var(--sunken); }
+.icon-btn svg { width: 24px; height: 24px; }
+
+/* ---------- 섹션 ---------- */
+.section { padding: var(--space-6) var(--gutter-screen) var(--space-3); }
+.overline { margin: 0; font-size: 11px; line-height: 16px; font-weight: 700; letter-spacing: .6px; color: var(--text-tertiary); }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.section-head h2 { margin: 0; font-size: 15px; line-height: 22px; font-weight: 600; }
+.section-head span { font-size: 13px; color: var(--text-tertiary); }
+
+/* ---------- 세그먼트 컨트롤 (트랙 sunken, 선택 ink-900 알약) ---------- */
+.segmented {
+  display: flex; padding: var(--space-half);
+  background: var(--sunken); border-radius: var(--radius-full);
+}
+.segmented.on-inverse { background: rgba(255,255,255,.90); }
+.segmented button {
+  flex: 1; min-height: 40px; border: 0; cursor: pointer;
+  background: transparent; color: var(--ink-600);
+  border-radius: var(--radius-full);
+  font-size: 14px; line-height: 20px; font-weight: 600;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1);
+  transition: background var(--dur-base) var(--ease), color var(--dur-base) var(--ease);
+}
+.segmented button[aria-checked="true"] { background: var(--ink-900); color: var(--ink-0); }
+.segmented .count { font-weight: 500; opacity: .7; }
+
+/* ---------- 카메라 셸 + 워터마크 명판 ---------- */
+.camera {
+  position: relative; overflow: hidden;
+  margin-top: var(--space-3);
+  aspect-ratio: 3 / 4; max-height: 520px; width: 100%;
+  border-radius: var(--radius-lg);
+  background: var(--camera-shell);
+  color: #fff;
+}
+/* 사진 대신 CSS로 그린 실내 장면 (예시) */
+.scene { position: absolute; inset: 0; }
+.scene::before {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(60% 40% at 72% 30%, rgba(255,255,255,.16), transparent 70%),
+    linear-gradient(180deg, #2b2b2f 0 58%, #1d1d20 58% 100%);
+}
+.scene::after { /* 창틀 + 바닥 원근선 */
+  content: ""; position: absolute; left: 52%; top: 14%; width: 34%; height: 34%;
+  border: 3px solid rgba(255,255,255,.18); border-radius: var(--radius-xs);
+  background:
+    linear-gradient(90deg, transparent calc(50% - 1.5px), rgba(255,255,255,.18) 0 calc(50% + 1.5px), transparent 0),
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
+  box-shadow: -140px 160px 0 -40px rgba(255,255,255,.03);
+}
+.floor {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 42%;
+  background: repeating-linear-gradient(100deg, transparent 0 46px, rgba(255,255,255,.05) 46px 48px);
+}
+.cam-top, .cam-bottom { position: absolute; left: 0; right: 0; z-index: 1; }
+.cam-top { top: 0; padding: var(--space-3) var(--space-3) var(--space-8); background: var(--camera-protect-top);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.cam-bottom { bottom: 0; padding: var(--space-10) var(--space-3) var(--space-3); background: var(--camera-protect-bottom); }
+
+.loc-badge {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  min-height: var(--badge); padding: 0 var(--space-3);
+  background: var(--camera-chip-bg); color: var(--ink-900);
+  border: 1px solid transparent; border-radius: var(--radius-full);
+  font-size: 13px; line-height: 18px; font-weight: 600; cursor: pointer;
+}
+.loc-badge .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.loc-badge[data-state="precise"] .dot { background: var(--ink-900); }
+.loc-badge[data-state="approximate"] .dot { border: 1.5px solid var(--ink-900); }
+.loc-badge[data-state="degraded"] { border-color: var(--caution-600); }
+.loc-badge[data-state="degraded"] .dot { border-radius: 0; background: var(--caution-600);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%); width: 12px; height: 11px; }
+.loc-badge[data-state="none"] .dot { border: 1.5px dashed var(--ink-500); }
+
+.frame-count { font-size: 13px; font-weight: 600; padding: 0 var(--space-2); text-shadow: 0 1px 1px rgba(0,0,0,.45); }
+
+.plate {
+  display: inline-block;
+  padding: 7px 10px;  /* fontSize × 0.54 / 0.77 — watermark_painter.dart:69-70 */
+  border-radius: 8px; /* fontSize × 0.62 */
+  background: var(--watermark-plate);
+  box-shadow: inset 0 0 0 1px var(--watermark-outline);
+  font-size: 13px; line-height: 1.45; font-weight: 600; letter-spacing: .1px;
+  font-feature-settings: var(--font-numeric);
+  text-shadow: 0 .4px .8px rgba(0,0,0,.45);
+  white-space: nowrap;
+}
+.plate span { display: block; }
+.cam-controls { margin-top: var(--space-3); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--space-3); }
+.cam-controls .seg-wrap { width: 100%; max-width: 132px; }
+.shutter {
+  width: var(--shutter); height: var(--shutter); flex: none;
+  border-radius: 50%; border: 3px solid rgba(255,255,255,.92);
+  background: transparent; display: grid; place-items: center; cursor: pointer;
+}
+.shutter::after { content: ""; width: 54px; height: 54px; border-radius: 50%; background: #fff;
+  transition: transform var(--dur-fast) var(--ease); }
+.shutter:active::after { transform: scale(.92); }
+.shutter:focus-visible { outline-color: #fff; outline-offset: 3px; }
+.cam-side { display: flex; justify-content: flex-end; }
+.done-btn { min-height: 40px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-full);
+  background: transparent; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; }
+.done-btn:hover { background: rgba(255,255,255,.12); }
+.camera .segmented button { min-height: 36px; }
+.camera :focus-visible { outline-color: #fff; }
+
+/* ---------- 헤어라인 리스트 (카드 없음) ---------- */
+.list { list-style: none; margin: 0; padding: 0; background: var(--surface);
+  border-top: 1px solid var(--border-hairline); border-bottom: 1px solid var(--border-hairline); }
+.row {
+  display: flex; align-items: center; gap: var(--space-3);
+  width: 100%; min-height: var(--row-3line);
+  padding: var(--space-4) var(--space-4);
+  background: transparent; border: 0; text-align: left; cursor: pointer;
+  transition: background var(--dur-fast) var(--ease);
+}
+.list li + li .row { border-top: 1px solid var(--border-hairline); }
+.row:hover { background: var(--ink-50); }
+.row:focus-visible { outline-offset: -2px; }
+.thumb { width: var(--thumb-sm); height: var(--thumb-sm); flex: none; border-radius: var(--radius-sm);
+  background: linear-gradient(160deg, var(--ink-300), var(--ink-500)); position: relative; overflow: hidden; }
+.thumb::after { content: ""; position: absolute; left: 4px; bottom: 4px; width: 22px; height: 7px;
+  border-radius: 2px; background: var(--watermark-plate); }
+.thumb.empty { background: var(--sunken); box-shadow: inset 0 0 0 1px var(--border-default); }
+.thumb.empty::after { display: none; }
+.row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-half); }
+.row-title { font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -.1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row-sub { font-size: 14px; line-height: 22px; color: var(--text-secondary); }
+.row-meta { font-size: 13px; line-height: 20px; color: var(--text-tertiary); display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.chev { width: 20px; height: 20px; flex: none; color: var(--ink-500); }
+
+/* 상태 배지 — 유채색은 의미에만, 아이콘·텍스트로 이중화 */
+.status { display: inline-flex; align-items: center; gap: var(--space-1);
+  height: 22px; padding: 0 var(--space-2); border-radius: var(--radius-xs);
+  font-size: 11px; line-height: 16px; font-weight: 700; letter-spacing: .6px; }
+.status svg { width: 12px; height: 12px; }
+.status.affirm { background: var(--affirm-100); color: var(--affirm-600); }
+.status.caution { background: var(--caution-100); color: var(--caution-600); }
+.status.danger { background: var(--danger-100); color: var(--danger-600); }
+.status.neutral { background: var(--ink-100); color: var(--ink-600); }
+
+/* 인라인 고지 */
+.notice { display: flex; gap: var(--space-3); margin: 0 var(--gutter-screen); padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md); background: var(--caution-100); color: var(--ink-900); font-size: 14px; line-height: 22px; }
+.notice strong { display: block; font-weight: 600; }
+.notice span { color: var(--text-secondary); }
+.notice svg { width: 20px; height: 20px; flex: none; margin-top: 1px; color: var(--caution-600); }
+
+.legend { padding: var(--space-6) var(--gutter-screen) var(--space-2); font-size: 13px; line-height: 20px; color: var(--text-tertiary); }
+
+/* ---------- 하단 고정 액션 바 (bottom_action_bar.dart) ---------- */
+.action-bar {
+  position: fixed; bottom: 0; left: 50%; z-index: 10;
+  width: min(100%, var(--column)); transform: translateX(-50%);
+  padding: var(--space-3) var(--gutter-screen) calc(var(--safe-bottom) + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--border-hairline);
+  box-shadow: var(--elev-3);
+}
+.action-bar .note { margin: 0 0 var(--space-2); text-align: center; font-size: 13px; line-height: 20px; color: var(--text-tertiary); }
+.action-bar .buttons { display: flex; gap: var(--space-2); }
+.btn {
+  flex: 1; min-height: var(--btn-lg); padding: 0 var(--space-5);
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  border-radius: var(--radius-full); cursor: pointer;
+  font-size: 16px; line-height: 22px; font-weight: 600;
+  transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.btn svg { width: 20px; height: 20px; }
+.btn.primary { background: var(--ink-900); color: var(--ink-0); border: 0; }
+.btn.primary:hover { background: var(--ink-800); }
+.btn.secondary { flex: 0 0 38%; background: var(--surface); color: var(--text-primary); border: var(--border-control) solid var(--ink-300); }
+.btn.secondary:hover { background: var(--ink-50); }
+.btn:active { transform: scale(.98); }
+
+/* 스낵바 (inverse, radius md) */
+.snack {
+  position: fixed; left: 50%; bottom: calc(120px + env(safe-area-inset-bottom)); z-index: 11;
+  width: min(calc(100% - 32px), calc(var(--column) - 32px));
+  transform: translate(-50%, 12px); opacity: 0; pointer-events: none;
+  padding: var(--space-3) var(--space-4); border-radius: var(--radius-md);
+  background: var(--inverse); color: var(--ink-0); font-size: 14px; line-height: 22px;
+  box-shadow: var(--elev-4);
+  transition: opacity var(--dur-base) var(--ease), transform var(--dur-base) var(--ease);
+}
+.snack.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 360px) {
+  .plate { font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="appbar">
+    <button class="icon-btn" aria-label="뒤로">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="titles">
+      <h1>행복아파트 1203호 입주청소</h1>
+      <p>9. 2. (수) 오후 6:55 · 예시</p>
+    </div>
+    <button class="icon-btn" aria-label="더 보기">
+      <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <section class="section" aria-labelledby="phase-h">
+      <div class="section-head">
+        <h2 id="phase-h">촬영 구분</h2>
+        <span>저장 완료분만 셉니다</span>
+      </div>
+      <div style="margin-top: var(--space-3)">
+        <div class="segmented" role="radiogroup" aria-label="전후 구분" data-seg="main">
+          <button role="radio" aria-checked="true" data-value="before">전 <span class="count">12</span></button>
+          <button role="radio" aria-checked="false" data-value="after">후 <span class="count">7</span></button>
+        </div>
+      </div>
+
+      <!-- 카메라 셸 미리보기 -->
+      <div class="camera" role="img" aria-label="카메라 미리보기와 촬영 시각·좌표 워터마크">
+        <div class="scene"><div class="floor"></div></div>
+        <div class="cam-top">
+          <button class="loc-badge" data-state="precise" id="loc" aria-label="위치 상태 바꾸기 (예시)">
+            <span class="dot" aria-hidden="true"></span><span id="loc-label">위치 정밀</span>
+          </button>
+          <span class="frame-count" id="frame-label">전 · 거실</span>
+        </div>
+        <div class="cam-bottom">
+          <div class="plate" aria-live="off">
+            <span id="wm-time">2026-07-21 09:14:02 +09:00</span>
+            <span id="wm-loc">37.50132, 127.03964 (정밀)</span>
+          </div>
+          <div class="cam-controls">
+            <div class="seg-wrap">
+              <div class="segmented on-inverse" role="radiogroup" aria-label="카메라 전후 구분" data-seg="cam">
+                <button role="radio" aria-checked="true" data-value="before">전</button>
+                <button role="radio" aria-checked="false" data-value="after">후</button>
+              </div>
+            </div>
+            <button class="shutter" id="shutter" aria-label="전 사진 촬영"></button>
+            <div class="cam-side"><button class="done-btn">완료</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="notice" role="note">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l10 18H2L12 3zm-1 7v5h2v-5h-2zm0 7v2h2v-2h-2z"/></svg>
+      <div><strong>주방 사진 1장은 위치가 대략입니다</strong><span>오류가 아닙니다. 워터마크에 소수 3자리 좌표가 남습니다.</span></div>
+    </div>
+
+    <section class="section" aria-labelledby="spaces-h" style="padding-bottom: var(--space-2)">
+      <div class="section-head">
+        <h2 id="spaces-h">공간별 기록</h2>
+        <span>4곳 · 예시 데이터</span>
+      </div>
+    </section>
+
+    <ul class="list" aria-label="공간 목록">
+      <li><button class="row">
+        <span class="thumb" aria-hidden="true"></span>
+        <span class="row-body">
+          <span class="row-title">거실</span>
+          <span class="row-sub">전 5 · 후 4 · 체크 6/6</span>
+          <span class="row-meta"><span class="status affirm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5 9-10"/></svg>저장됨</span>09:31 마지막 촬영</span>
+        </span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button></li>
+      <li><button class="row">
+        <span class="thumb" aria-hidden="true"></span>
+        <span class="row-body">
+          <span class="row-title">주방</span>
+          <span class="row-sub">전 4 · 후 3 · 체크 3/5</span>
+          <span class="row-meta"><span class="status caution"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l10 18H2z"/></svg>위치 대략</span>1장</span>
+        </span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button></li>
+      <li><button class="row">
+        <span class="thumb" aria-hidden="true"></span>
+        <span class="row-body">
+          <span class="row-title">욕실 1</span>
+          <span class="row-sub">전 3 · 후 0 · 체크 0/4</span>
+          <span class="row-meta"><span class="status danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 6v8M12 18v.5"/></svg>저장 실패</span>다시 저장이 필요합니다</span>
+        </span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button></li>
+      <li><button class="row">
+        <span class="thumb empty" aria-hidden="true"></span>
+        <span class="row-body">
+          <span class="row-title">베란다</span>
+          <span class="row-sub">아직 기록이 없습니다</span>
+          <span class="row-meta"><span class="status neutral">대기</span></span>
+        </span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button></li>
+    </ul>
+
+    <p class="legend">좌표 소수 자릿수가 정밀도를 드러냅니다 — 정밀 5 · 저정밀 4 · 대략 3. 표시된 숫자는 모두 예시입니다.</p>
+  </main>
+
+  <div class="snack" id="snack" role="status" aria-live="polite"></div>
+
+  <nav class="action-bar" aria-label="주요 행동">
+    <p class="note">공유를 눌러야 기기 밖으로 전달됩니다</p>
+    <div class="buttons">
+      <button class="btn secondary" id="share">공유</button>
+      <button class="btn primary" id="primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        <span id="primary-label">전 사진 촬영</span>
+      </button>
+    </div>
+  </nav>
+</div>
+
+<script>
+(function () {
+  var phase = 'before';
+  var names = { before: '전', after: '후' };
+  var locStates = [
+    ['precise', '위치 정밀', 5, '정밀'],
+    ['approximate', '위치 대략', 3, '대략'],
+    ['degraded', '위치 저하', 4, '저정밀'],
+    ['none', '위치 없음', 0, '']
+  ];
+  var li = 0, lat = 37.50132, lng = 127.03964; /* 예시 좌표 */
+
+  function setPhase(v) {
+    phase = v;
+    document.querySelectorAll('.segmented').forEach(function (g) {
+      g.querySelectorAll('button').forEach(function (b) {
+        var on = b.dataset.value === v;
+        b.setAttribute('aria-checked', on); b.tabIndex = on ? 0 : -1;
+      });
+    });
+    document.getElementById('primary-label').textContent = names[v] + ' 사진 촬영';
+    document.getElementById('shutter').setAttribute('aria-label', names[v] + ' 사진 촬영');
+    document.getElementById('frame-label').textContent = names[v] + ' · 거실';
+  }
+  document.querySelectorAll('.segmented').forEach(function (g) {
+    g.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (b) setPhase(b.dataset.value);
+    });
+    g.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      var v = phase === 'before' ? 'after' : 'before';
+      setPhase(v); g.querySelector('[data-value="' + v + '"]').focus(); e.preventDefault();
+    });
+  });
+  setPhase('before');
+
+  var loc = document.getElementById('loc');
+  function renderLoc() {
+    var s = locStates[li];
+    loc.dataset.state = s[0];
+    document.getElementById('loc-label').textContent = s[1];
+    document.getElementById('wm-loc').textContent = s[2]
+      ? lat.toFixed(s[2]) + ', ' + lng.toFixed(s[2]) + ' (' + s[3] + ')'
+      : '위치 없음';
+  }
+  loc.addEventListener('click', function () { li = (li + 1) % locStates.length; renderLoc(); });
+  renderLoc();
+
+  /* 워터마크 시각: YYYY-MM-DD HH:mm:ss ±HH:MM (watermark_painter.dart:32-42) */
+  function two(n) { return String(n).padStart(2, '0'); }
+  function stamp(d) {
+    var off = -d.getTimezoneOffset(), sign = off < 0 ? '-' : '+'; off = Math.abs(off);
+    return d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate()) + ' ' +
+      two(d.getHours()) + ':' + two(d.getMinutes()) + ':' + two(d.getSeconds()) + ' ' +
+      sign + two(Math.floor(off / 60)) + ':' + two(off % 60);
+  }
+  var wm = document.getElementById('wm-time');
+  function tick() { wm.textContent = stamp(new Date()); }
+  tick(); setInterval(tick, 1000);
+
+  var snack = document.getElementById('snack'), t;
+  function toast(msg) {
+    snack.textContent = msg; snack.classList.add('show');
+    clearTimeout(t); t = setTimeout(function () { snack.classList.remove('show'); }, 2400);
+  }
+  function shoot() { toast(names[phase] + ' 사진을 저장했습니다 · ' + wm.textContent.slice(11, 19)); }
+  document.getElementById('shutter').addEventListener('click', shoot);
+  document.getElementById('primary').addEventListener('click', shoot);
+  document.getElementById('share').addEventListener('click', function () { toast('공유 시트를 엽니다 (예시)'); });
+})();
+</script>
+</body>
+</html>
