@@ -57,3 +57,7 @@ codex plugin marketplace upgrade design-templates
 
 - 이 저장소에는 `design-interview` 스킬만 들어 있습니다. 스킬 본문에 나오는 다음 단계 스킬(`design-generation`, `design-review` 등)은 포함되지 않았습니다. 없으면 그 단계를 건너뛰고 바로 구현합니다.
 - 템플릿의 예시 데이터와 이름은 모두 가상입니다.
+
+## 라이선스
+
+[MIT](LICENSE). 템플릿을 복사·수정해 상업 프로젝트에 써도 됩니다. 저작권 표시와 라이선스 문구만 함께 남겨 주세요.
